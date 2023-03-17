@@ -1,12 +1,10 @@
 import os
 import openai
-from dotenv import load_dotenv
 from colorama import Fore, Back, Style
 import discord
 from config import OPENAI_API_KEY
 
 # load values from the .env file if it exists
-load_dotenv()
 
 # configure OpenAI (need to do the env thing later)
 openai.api_key = OPENAI_API_KEY
