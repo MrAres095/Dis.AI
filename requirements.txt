@@ -2,3 +2,5 @@ discord
 asyncio
 aiofiles
 openai
+dotenv
+colorama
