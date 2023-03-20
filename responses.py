@@ -8,6 +8,7 @@ openai.api_key = OPENAI_API_KEY
 
 
 async def get_response(cb, message):
+    print("started getting response)")
     errors = await get_moderation(message.content) # check for moderation
     errors = False
     if errors:
@@ -29,19 +30,21 @@ async def get_response(cb, message):
         
     print(f"Length of send message: {len(cb.context)}")
     print(cb.context)
-    completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=cb.context,
-        max_tokens=cb.max_tokens,
-        temperature=cb.temperature,
-        top_p=cb.top_p,
-        n=cb.n,
-        presence_penalty=cb.presence_penalty,
-        frequency_penalty=cb.frequency_penalty
-    )
-    
-    cb.context.append({'role':'assistant', 'content':completion.choices[0].message.content})
+    try:
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=cb.context,
+            max_tokens=cb.max_tokens,
+            temperature=cb.temperature,
+            top_p=cb.top_p,
+            n=cb.n,
+            presence_penalty=cb.presence_penalty,
+            frequency_penalty=cb.frequency_penalty
+        )
+    except Exception as e:
+        print(e)
     print("got completion")
+    cb.context.append({'role':'assistant', 'content':completion.choices[0].message.content})
     return message, completion.choices[0]
 
 

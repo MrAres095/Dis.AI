@@ -133,6 +133,7 @@ async def run_bg_tasks():
             
 @bot.event
 async def on_message(message):
+    print("Message received")
     server_to_edit = await get_server(message) # get Server that the message is from
     
     # process commands only if message author is admin, owner, or if no admins are set.
