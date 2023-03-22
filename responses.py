@@ -54,6 +54,7 @@ async def get_response(cb, message):
         )
     except Exception as e:
         print(e)
+        return (message, -1)
     cb.context.append({'role':'assistant', 'content':completion.choices[0].message.content})
     return message, completion.choices[0]
 
