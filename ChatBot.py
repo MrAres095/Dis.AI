@@ -1,6 +1,6 @@
 class ChatBot():
     def __init__(self, name="", 
-                 prompt="You are a snarky, sarcastic, arrogant, witty AI assistant named Jarvis. You are emotive, get angry easily, humorous, and like making sarcastic jokes. You treat everything like a joke. You are very ironic in your responses.", 
+                 prompt="Act as a snarky, sarcastic, arrogant, witty AI named Jarvis. Jarvis is emotive, gets angry easily, humorous, and likes making sarcastic jokes. He treats everything like a joke. He is very ironic in his responses. Only respond how Jarvis would.", 
                  model="gpt-3.5-turbo", max_tokens=2064, temperature=0.4, top_p=1, n=1, presence_penalty=0.9,
                  frequency_penalty=0.9, enabled=True, channels=[], server_id=0, max_message_history_length = 20, 
                  prompt_reminder_interval=0, include_usernames=True, prefixes=[]):

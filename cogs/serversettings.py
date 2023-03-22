@@ -18,7 +18,7 @@ class ServerSettings(commands.Cog):
     @commands.command()
     async def addadminrole(self, ctx) -> None:
         if not ctx.message.role_mentions:
-            embed=discord.Embed(title="Set Admin Role Error", description="Be sure to mention a role\nUsage: ai.setadminrole @role", colour=Colour.blue())
+            embed=discord.Embed(title="Error", description="Be sure to mention a role\nUsage: ai.setadminrole @role", colour=Colour.red())
             await ctx.send(embed=embed)
             return
         server_to_edit = await get_server(ctx)  
@@ -28,13 +28,13 @@ class ServerSettings(commands.Cog):
             embed=discord.Embed(title="Added admin role", description=f"{ctx.message.role_mentions[0].mention} can now change chatbot settings.", colour=Colour.blue())
             await ctx.send(embed=embed)
         else:
-            embed=discord.Embed(title="Set Admin Role Error", description="Role already set as admin\nUsage: ai.setadminrole @role", colour=Colour.blue())
+            embed=discord.Embed(title="Error", description="Role already set as admin\nUsage: ai.setadminrole @role", colour=Colour.red())
             await ctx.send(embed=embed)
             
     @commands.command()
     async def removeadminrole(self, ctx) -> None:
         if not ctx.message.role_mentions:
-            embed=discord.Embed(title="Set Admin Role Error", description="Be sure to mention a role\nUsage: ai.setadminrole @role", colour=Colour.blue())
+            embed=discord.Embed(title="Error", description="Be sure to mention a role\nUsage: ai.setadminrole @role", colour=Colour.red())
             await ctx.send(embed=embed)
             return
         server_to_edit = await get_server(ctx)
@@ -44,14 +44,14 @@ class ServerSettings(commands.Cog):
             embed=discord.Embed(title="Removed admin role", description=f"{ctx.message.role_mentions[0].mention} is no longer a valid admin role.", colour=Colour.blue())
             await ctx.send(embed=embed)
         else:
-            embed=discord.Embed(title="Set Admin Role Error", description="Role is already not an admin role.\nUsage:\nai.removeadminrole @[role]", colour=Colour.blue())
+            embed=discord.Embed(title="Error", description="Role is already not an admin role.\nUsage:\nai.removeadminrole @[role]", colour=Colour.red())
             await ctx.send(embed=embed)
             
             
     @commands.command()
     async def addallowedrole(self, ctx) -> None:
         if not ctx.message.role_mentions:
-            embed=discord.Embed(title="Set Allowed Role Error", description="Be sure to mention a role\nUsage: ai.setadminrole @role", colour=Colour.blue())
+            embed=discord.Embed(title="Error", description="Be sure to mention a role\nUsage: ai.setadminrole @role", colour=Colour.red())
             await ctx.send(embed=embed)
             return
         server_to_edit = await get_server(ctx)  
@@ -61,13 +61,13 @@ class ServerSettings(commands.Cog):
             embed=discord.Embed(title="Allowed Role", description = f"Chatbot will now respond to users with {ctx.message.role_mentions[0].mention} role", colour=Colour.blue())
             await ctx.send(embed=embed)
         else:
-            embed=discord.Embed(title="Set Allowed Role Error", description="Role already added\nUsage: ai.setallowedrole @role", colour=Colour.blue())
+            embed=discord.Embed(title="Error", description="Role already added\nUsage: ai.setallowedrole @role", colour=Colour.red())
             await ctx.send(embed=embed)
             
     @commands.command()
     async def removeallowedrole(self, ctx) -> None:
         if not ctx.message.role_mentions:
-            embed=discord.Embed(title="Remove Allowed Role Error", description="Be sure to mention a role\nUsage: ai.setadminrole @role", colour=Colour.blue())
+            embed=discord.Embed(title="Error", description="Be sure to mention a role\nUsage: ai.setadminrole @role", colour=Colour.red())
             await ctx.send(embed=embed)
             return
         server_to_edit = await get_server(ctx)
@@ -77,7 +77,7 @@ class ServerSettings(commands.Cog):
             embed=discord.Embed(title="Removed allowed role", description=f"Chatbot will no longer respond to users with {ctx.message.role_mentions[0].mention} role", colour=Colour.blue())
             await ctx.send(embed=embed)
         else:
-            embed=discord.Embed(title="Set Allowed Role Error", description="Role is already not an allowed role.\nUsage:\nai.removeadminrole @[role]", colour=Colour.blue())
+            embed=discord.Embed(title="Error", description="Role is already not an allowed role.\nUsage:\nai.removeadminrole @[role]", colour=Colour.red())
             await ctx.send(embed=embed)
             
 

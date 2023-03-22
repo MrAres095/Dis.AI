@@ -8,28 +8,39 @@ openai.api_key = OPENAI_API_KEY
 
 
 async def get_response(cb, message):
-    print("started getting response)")
-    errors = await get_moderation(message.content) # check for moderation
-    errors = False
+    print("Began get_response")
+    try:
+        errors = await get_moderation(message.content) # check for moderation
+    except Exception as e:
+        print("Moderation error")
+        print(e)
+    errors = False # delete later
     if errors:
         del cb.context[-1]
         return (message, -1)
+    
     # build the messages
-    if (len(cb.context) >= cb.max_message_history_length):
-        del cb.context[1]
+    if (len(cb.context) >= cb.max_message_history_length): # trim cb.context if it's >= mmhl
+        print("Trimmed context")
+        del cb.context[1:3]
         
-    if (cb.prompt_reminder_interval > 0 and len(cb.context) >= cb.prompt_reminder_interval):
+    if (cb.prompt_reminder_interval > 0 and len(cb.context) >= cb.prompt_reminder_interval): # insert system message if it didn't occur in the last cb.prompt_reminder_interval messages
         for msg in cb.context[(-1 * cb.prompt_reminder_interval):]:
             if msg['role'] == 'system':
                 break
         else:
+            print("Systemmessage missing in the last prm messges. Inserting.")
             cb.context.append({'role':'system', 'content': cb.prompt})
 
     if cb.context[0]['role'] != 'system':
+        print("System message missing. Inserted system message.")
         cb.context.insert(0, {'role':'system', 'content':cb.prompt})
-        
-    print(f"Length of send message: {len(cb.context)}")
-    print(cb.context)
+    
+    
+    print(f"Context below. (Len: {len(cb.context)})")
+    for line in cb.context:
+        print(line)
+    print("Getting completion")
     try:
         completion = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
@@ -43,7 +54,6 @@ async def get_response(cb, message):
         )
     except Exception as e:
         print(e)
-    print("got completion")
     cb.context.append({'role':'assistant', 'content':completion.choices[0].message.content})
     return message, completion.choices[0]
 

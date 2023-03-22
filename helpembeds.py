@@ -1,6 +1,6 @@
 import discord
 
-helpEmbed1 = discord.Embed(title="Commands List (prefix: 'ai.')", description="Page 1/2 (General Settings")
+helpEmbed1 = discord.Embed(title="Commands List (prefix: 'ai.')", description="Page 1/3 (General Settings\nType 'ai.help 2' for page 2 (Output Generation Settings)", colour=discord.Colour.blue())
 helpEmbed1.add_field(name='ai.newchat name (ai.nc)', inline=False,
                         value='Creates a new chatbot with the given name. All settings are initialized to default. Use ai.channeladd [chatbot name] to add the created bot to a channel.\n\n\n\n')
 helpEmbed1.add_field(name='ai.deletechat [chatbot name] (ai.dc)', inline=False,
@@ -19,9 +19,8 @@ helpEmbed1.add_field(name="ai.setdefault [chatbot name]", inline=False,
                      value="Resets the settings of the specified chatbot to default")
 helpEmbed1.add_field(name="ai.clearmessagehistory [chatbot name] [number of messages to delete] (ai.cmh)", inline=False,
                 value="Deletes the last given number of messages from the chatbot's memory. To clear all messages, don't enter any number.")
-helpEmbed1.add_field(name="Type 'ai.help 2' for page 2 (Output Generation Settings)", value="")
 
-helpEmbed2 = discord.Embed(title="Commands List (prefix: '.ai')", description="Page 2/3 (Output Generation Settings)")
+helpEmbed2 = discord.Embed(title="Commands List (prefix: '.ai')", description="Page 2/3 (Output Generation Settings)", colour=discord.Colour.blue())
 helpEmbed2.add_field(name="ai.maxtokens [chatbot name] [value] (ai.mtk)", inline=False,
                 value="Sets maximum output tokens of the specified chatbot to the given value\n")
 helpEmbed2.add_field(name='ai.temperature [chatbot name] [value] (ai.temp)', inline=False,
@@ -41,7 +40,7 @@ helpEmbed2.add_field(name="ai.includeusernames [chatbot name] [true/false] (ai.i
 helpEmbed2.add_field(name="Type 'ai.help 3' for page 3 (Misc Settings)", value="")
 
 
-helpEmbed3 = discord.Embed(title="Commands List (prefix: '.ai')", description="Page 3/3 (Misc Settings)")
+helpEmbed3 = discord.Embed(title="Commands List (prefix: '.ai')", description="Page 3/3 (Misc Settings)", colour=discord.Colour.blue())
 helpEmbed3.add_field(name="ai.addadminrole [@role]", inline=False,
                      value="Specify admin roles. Only admin roles can use Dis.AI commands. If no roles are added, then only the owner of the server can use 'ai.' commands.")
 helpEmbed3.add_field(name="ai.removeadminrole [@role]", inline=False,

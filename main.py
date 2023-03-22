@@ -11,6 +11,7 @@ from jsonhandler import *
 import Server
 from helpembeds import help_embeds
 from config import DISCORD_TOKEN
+from messagehandler import *
 
 
 # note to self: if adding new ChatBot properties, check make dict, checkjson, load, and ChatBot.py
@@ -108,7 +109,9 @@ async def run_bg_tasks():
             await asyncio.sleep(0)
             continue
         # get the first completed task from the set of background tasks
+        print("Task detected. Running task")
         done, _ = await asyncio.wait(background_tasks, return_when=asyncio.FIRST_COMPLETED)
+        print("Got completion:")
         # remove the completed task from the set of background tasks
         response = done.pop()
         background_tasks.remove(response)
@@ -120,29 +123,23 @@ async def run_bg_tasks():
             await response[0].channel.send(embed=embed)
             continue
 
-        msg = str(response[1].message.content) # max character count for messages is 2000. if the output is greater, split it into multiple messages
-        max_msgs = (len(msg) // 2000) + 1
-        if max_msgs > 1:
-            for i in range(max_msgs):
-                await response[0].channel.send(msg[i*1990:(i+1)*1990] + f" ({i + 1}/{max_msgs})")
-        else:
-            try:
-                await response[0].channel.send(str(msg))
-            except Exception as e:
-                print(e)
+        await send_msg(response[0].channel, str(response[1].message.content))# max character count for messages is 2000. if the output is greater, split it into multiple messages
+        
+        print("Ran and sent task")
             
 @bot.event
 async def on_message(message):
-    print("Message received")
     server_to_edit = await get_server(message) # get Server that the message is from
     
     # process commands only if message author is admin, owner, or if no admins are set.
-    if not server_to_edit.adminroles or message.author.id == message.guild.owner.id or any(role in server_to_edit.adminroles for role in message.author.roles):
+    if message.content[0:3].lower() == 'ai.' and (not server_to_edit.adminroles or message.author.id == message.guild.owner.id or any(role in server_to_edit.adminroles for role in message.author.roles)):
         await bot.process_commands(message)
-    if message.content[0:3] == 'ai.': # don't process command messages
+        print(f"Processed command: {message.content}")
         return
     if message.author == bot.user: # don't process bot messages (may change later)
         return
+    
+    print(f"\nUser message received: '{message.content}'" )
     for cb in lists.bot_instances[str(message.guild.id)]:   # for each chatbot in the server
         if (cb.enabled and message.channel.id in cb.channels): # if the given ChatBot is enabled and can talk in the channel
             if cb.include_usernames: # get username / nick if nicked
@@ -156,9 +153,8 @@ async def on_message(message):
             #if allowedroles not set or author is guild owner or user has an allowed role, create completion task
             if not server_to_edit.allowedroles or message.author.id == message.guild.owner.id or any(role in server_to_edit.allowedroles for role in message.author.roles):
                 if not cb.prefixes or any(message.content.startswith(prefix) for prefix in cb.prefixes):
-                    print("awaiting completion")
-                    response_task = asyncio.create_task(responses.get_response(cb, message)) # get response from openai
-                    background_tasks.add(response_task)
+                    background_tasks.add(asyncio.create_task(responses.get_response(cb, message))) # get response from openai
+                    print("Added completion to tasks")
 
 
 async def load():

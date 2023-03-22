@@ -1,4 +1,5 @@
 /config.py
-/cogs/__pycahce__/
+/cogs/__pycache__/
 /__pycache__/
 /puty.ppk
+/data.json

@@ -5,6 +5,7 @@ import lists
 import ChatBot
 from jsonhandler import *
 from discord import Colour
+from messagehandler import *
 
 # commands that change a chatbot's settings
 class ChatBotSettings(commands.Cog):
@@ -35,25 +36,24 @@ class ChatBotSettings(commands.Cog):
         try:
             channels = [self.bot.get_channel(channel_id).name for channel_id in cb.channels]
             out = f"""
-            **Name:** {cb.name}
-**Prompt:** {cb.prompt}
+            __**General**__
+**Name:** {cb.name}
+**Prompt:**{cb.prompt}
 **Enabled:** {cb.enabled}
 **Allowed Channels:** {", ".join(channels)}
 **Prefixes:** {", ".join(cb.prefixes)}
+**Include usernames:** {cb.include_usernames}
+
+__**Output Generation**__
 **Max Tokens:** {cb.max_tokens}
 **Temperature:** {cb.temperature}
 **Presence Penalty:** {cb.presence_penalty}
 **Frequency Penalty:** {cb.frequency_penalty}
-**Top P:** {cb.top_p}
+**Top P:**__ {cb.top_p}
 **Max Message History Length:** {cb.max_message_history_length}
 **Prompt Reminder Interval:** {cb.prompt_reminder_interval}
             """
-            max_msgs = (len(out) // 2000) + 1
-            if max_msgs > 1:
-                for i in range(max_msgs):
-                    await ctx.send(out[i*1990:(i+1)*1990] + f" ({i + 1}/{max_msgs})")
-            else:
-                await ctx.send(out)
+            await send_msg(ctx, out)
         except Exception as e:
             print(e)
             
@@ -104,7 +104,7 @@ class ChatBotSettings(commands.Cog):
         except Exception as e:
             print(e)
             
-    @commands.command()
+    @commands.command(aliases=['dc'])
     async def deletechat(self, ctx, name=None):
         cb = await get_cb(ctx, name)
         if not cb or not name:
@@ -112,9 +112,7 @@ class ChatBotSettings(commands.Cog):
             await ctx.send(embed=embed)
             return
         try:
-            print("trying success")
             success = await delete_bot_json(ctx.guild.id, await make_bot_dict(cb))
-            print("done with success")
             if success:
                 botname = cb.name
                 print(lists.bot_instances)
@@ -125,8 +123,6 @@ class ChatBotSettings(commands.Cog):
             else:
                 embed = discord.Embed(title=f"Invalid name. Please try again", description="Example\nai.deletechat Storywriter", colour=Colour.blue())
                 await ctx.send(embed=embed)
-                
-                
         except Exception as e:
             print(e)
             
@@ -372,8 +368,8 @@ class ChatBotSettings(commands.Cog):
             embed.add_field(name="", value=str(msgstr))
             await ctx.send(embed=embed)
 
-    @commands.command(aliases=["rmh"])
-    async def resetmessagehistory(self, ctx, name=None, *msgs_to_delete) -> None:
+    @commands.command(aliases=["cmh"])
+    async def clearmessagehistory(self, ctx, name=None, *msgs_to_delete) -> None:
         cb = await get_cb(ctx, name)
         if not cb:
             embed = discord.Embed(title=f"Invalid name. Please try again", description="Example:\nai.rmh Storywriter 4", colour=Colour.blue())
@@ -386,12 +382,12 @@ class ChatBotSettings(commands.Cog):
                 await ctx.send(embed=embed)
             else:   
                 del cb.context[(-1 * msgs_to_delete):]
-                embed = discord.Embed(title=f"Reset message history for {cb.name}", description=f"{msgs_to_delete} messages deleted", colour=Colour.blue())
+                embed = discord.Embed(title=f"Cleared message history for {cb.name}", description=f"{msgs_to_delete} messages deleted", colour=Colour.blue())
                 await ctx.send(embed=embed)
         except Exception as e:
             ctxlen = len(cb.context)
             cb.context.clear()
-            embed = discord.Embed(title=f"Reset message history for {cb.name}", description=f"{ctxlen} messages deleted", colour=Colour.blue())
+            embed = discord.Embed(title=f"Cleared message history for {cb.name}", description=f"{ctxlen} messages deleted", colour=Colour.blue())
             await ctx.send(embed=embed)
             
     @commands.command(aliases=["ap"])
