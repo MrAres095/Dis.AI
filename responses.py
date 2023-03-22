@@ -52,9 +52,14 @@ async def get_response(cb, message):
             presence_penalty=cb.presence_penalty,
             frequency_penalty=cb.frequency_penalty
         )
+        print("ok we have got the completion, no exception")
     except Exception as e:
+        print("completion exception")
         print(e)
+        del cb.context[-1]
+        print("ok no exception in the del, returning")
         return (message, -2)
+    print("no exception at all, msg all good")
     cb.context.append({'role':'assistant', 'content':completion.choices[0].message.content})
     return message, completion.choices[0]
 

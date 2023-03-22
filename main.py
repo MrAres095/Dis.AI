@@ -123,10 +123,13 @@ async def run_bg_tasks():
             await response[0].channel.send(embed=embed)
             continue
         elif response[1] == -2:
-            embed = discord.Embed(title="Message requested too many tokens. Please reduce max tokens (ai.mtk [chatbot name], recommended) or clear message history (ai.cmh [chatbot name] (num message to delete, leave empty to delete all)")
-            await response[0].channel.send(embed=embed)
-            continue
-
+            try:
+                embed = discord.Embed(title="Error: Message requested too many tokens.\n Please reduce max tokens (ai.mtk [chatbot name], recommended) or clear message history (ai.cmh [chatbot name] (num message to delete, leave empty to delete all))", color=discord.Colour.red())
+                await response[0].channel.send(embed=embed)
+                continue
+            except Exception as e:
+                print("after mtk embed error")
+                print(e)
         await send_msg(response[0].channel, str(response[1].message.content))# max character count for messages is 2000. if the output is greater, split it into multiple messages
         
         print("Ran and sent task")
