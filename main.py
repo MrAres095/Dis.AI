@@ -5,7 +5,6 @@ import json
 from discord.ext import commands
 from discord import app_commands
 import aiofiles
-import interactions
 import typing
 import time
 
