@@ -1,5 +1,5 @@
 import json
-import lists
+import extensions.lists as lists
 
 async def get_cb(ctx, name):
     # get the chatbot to edit

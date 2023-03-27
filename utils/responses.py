@@ -1,14 +1,13 @@
 import os
 import openai
-from colorama import Fore, Back, Style
 import discord
 from config import OPENAI_API_KEY
+import openai_async
 
 openai.api_key = OPENAI_API_KEY
 
 
 async def get_response(cb, message):
-    print("Began get_response")
     try:
         errors = await get_moderation(message.content) # check for moderation
     except Exception as e:
@@ -20,8 +19,7 @@ async def get_response(cb, message):
         return (message, -1)
     
     # build the messages
-    if (len(cb.context) >= cb.max_message_history_length): # trim cb.context if it's >= mmhl
-        print("Trimmed context")
+    while (len(cb.context) > cb.max_message_history_length): # trim cb.context (excluding prompt) if it's >= mmhl
         del cb.context[1:3]
         
     if (cb.prompt_reminder_interval > 0 and len(cb.context) >= cb.prompt_reminder_interval): # insert system message if it didn't occur in the last cb.prompt_reminder_interval messages
@@ -29,39 +27,36 @@ async def get_response(cb, message):
             if msg['role'] == 'system':
                 break
         else:
-            print("Systemmessage missing in the last prm messges. Inserting.")
             cb.context.append({'role':'system', 'content': cb.prompt})
 
     if cb.context[0]['role'] != 'system':
-        print("System message missing. Inserted system message.")
         cb.context.insert(0, {'role':'system', 'content':cb.prompt})
     
     
     print(f"Context below. (Len: {len(cb.context)})")
     for line in cb.context:
         print(line)
-    print("Getting completion")
     try:
-        completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=cb.context,
-            max_tokens=cb.max_tokens,
-            temperature=cb.temperature,
-            top_p=cb.top_p,
-            n=cb.n,
-            presence_penalty=cb.presence_penalty,
-            frequency_penalty=cb.frequency_penalty
+        completion = await openai_async.chat_complete(
+            OPENAI_API_KEY,
+            timeout=15,
+            payload={
+                "model":"gpt-3.5-turbo",
+                "messages":cb.context,
+                "max_tokens":cb.max_tokens,
+                "temperature":cb.temperature,
+                "top_p":cb.top_p,
+                "n":cb.n,
+                "presence_penalty":cb.presence_penalty,
+                "frequency_penalty":cb.frequency_penalty
+            }
         )
-        print("ok we have got the completion, no exception")
     except Exception as e:
-        print("completion exception")
         print(e)
         del cb.context[-1]
-        print("ok no exception in the del, returning")
         return (message, -2)
-    print("no exception at all, msg all good")
-    cb.context.append({'role':'assistant', 'content':completion.choices[0].message.content})
-    return message, completion.choices[0]
+    cb.context.append({'role':'assistant', 'content':completion.json()['choices'][0]['message']['content']})
+    return message, completion.json()['choices'][0]
 
 
 async def get_moderation(question):
@@ -92,36 +87,3 @@ async def get_moderation(question):
         return result
     return None
 
-
-def main():
-    os.system("cls" if os.name == "nt" else "clear")
-    # keep track of previous questions and answers
-    previous_questions_and_answers = []
-    while True:
-        # ask the user for their question
-        new_question = input(
-            Fore.GREEN + Style.BRIGHT + "What can I get you?: " + Style.RESET_ALL
-        )
-        # check the question is safe
-        errors = get_moderation(new_question)
-        if errors:
-            print(
-                Fore.RED
-                + Style.BRIGHT
-                + "Sorry, you're question didn't pass the moderation check:"
-            )
-            for error in errors:
-                print(error)
-            print(Style.RESET_ALL)
-            continue
-        response = get_response(INSTRUCTIONS, previous_questions_and_answers, new_question)
-
-        # add the new question and answer to the list of previous questions and answers
-        previous_questions_and_answers.append((new_question, response))
-
-        # print the response
-        print(Fore.CYAN + Style.BRIGHT + "Here you go: " + Style.NORMAL + response)
-
-
-if __name__ == "__main__":
-    main()

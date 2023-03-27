@@ -4,19 +4,20 @@ class Server():
         self.adminroles = adminroles
         self.allowedroles = allowedroles
         
-    def set_admin_roles(self, role):
-        if role not in self.adminroles:
-            self.adminroles.append(role.id)
-        if role not in self.allowedroles:
-            self.allowedroles.append(role.id)
+    async def set_admin_roles(self, roles):
+        for role in roles:
+            if role not in self.adminroles:
+                self.adminroles.append(role)
+            if role not in self.allowedroles:
+                self.allowedroles.append(role)
                 
-    def set_allowed_roles(self, *roles):
+    async def set_allowed_roles(self, roles):
         for adminrole in self.adminroles:
             if adminrole not in self.allowedroles:
-                self.allowedroles.append(adminrole.id)
+                self.allowedroles.append(adminrole)
         for role in roles:
             if role not in self.allowedroles:
-                self.allowedroles.append(role.id)
+                self.allowedroles.append(role)
                 
         
         

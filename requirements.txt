@@ -3,3 +3,4 @@ asyncio
 aiofiles
 openai
 colorama
+openai-async

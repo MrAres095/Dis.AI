@@ -62,7 +62,7 @@ class ChatBot():
         except Exception as e:
             print(e)
             return False
-        if top_p <= 1:
+        if top_p <= 1 and top_p >= 0:
             self.top_p = top_p
             return True
         else:
@@ -139,13 +139,13 @@ class ChatBot():
             return True
         return False
             
-    def add_prefix(self, prefix):
+    def addprefix(self, prefix):
         if isinstance(prefix, str):
             self.prefixes.append(prefix)
             return True
         return False
     
-    def remove_prefix(self, prefix):
+    def removeprefix(self, prefix):
         if isinstance(prefix, str) and prefix in self.prefixes:
             self.prefixes.remove(prefix)
             return True
