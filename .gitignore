@@ -3,3 +3,6 @@
 /__pycache__/
 /puty.ppk
 /data.json
+/core/__pycache__/
+/utils/__pycache__/
+/extensions/__pycache__/
