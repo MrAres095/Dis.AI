@@ -13,10 +13,9 @@ async def get_response(cb, message):
     except Exception as e:
         print("Moderation error")
         print(e)
-    errors = False # delete later
     if errors:
         del cb.context[-1]
-        return (message, -1)
+        return (-1, str(errors))
     
     # build the messages
     while (len(cb.context) > cb.max_message_history_length): # trim cb.context (excluding prompt) if it's >= mmhl
@@ -39,7 +38,7 @@ async def get_response(cb, message):
     try:
         completion = await openai_async.chat_complete(
             OPENAI_API_KEY,
-            timeout=15,
+            timeout=300,
             payload={
                 "model":"gpt-3.5-turbo",
                 "messages":cb.context,
@@ -51,12 +50,14 @@ async def get_response(cb, message):
                 "frequency_penalty":cb.frequency_penalty
             }
         )
+        cb.context.append({'role':'assistant', 'content':completion.json()['choices'][0]['message']['content']})
+        return 0, completion.json()['choices'][0]
     except Exception as e:
+        print("responses error")
         print(e)
         del cb.context[-1]
-        return (message, -2)
-    cb.context.append({'role':'assistant', 'content':completion.json()['choices'][0]['message']['content']})
-    return message, completion.json()['choices'][0]
+        return (-2, str(e))
+    
 
 
 async def get_moderation(question):

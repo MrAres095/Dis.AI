@@ -129,43 +129,37 @@ async def process_ai_response(current_server, message):
                     async with message.channel.typing():
                         response = await responses.get_response(cb, message) # get response from openai
                         try:
-                            if response[1] == -1:
-                                embed = discord.Embed(title="Message failed OpenAI moderation check. Please comply with OpenAI usage policies.")
-                                await response[0].channel.send(embed=embed)
-                                continue
-                            elif response[1] == -2:
-                                try:
-                                    embed = discord.Embed(title="Error: Message requested too many tokens.\n Please reduce max tokens (ai.mtk [chatbot name], recommended) or clear message history (ai.cmh [chatbot name] (num message to delete, leave empty to delete all))", color=discord.Colour.red())
-                                    await response[0].channel.send(embed=embed)
-                                    continue
-                                except Exception as e:
-                                    print("after mtk embed error")
-                                    print(e)
-                            await messagehandler.send_channel_msg(response[0].channel, str(response[1]['message']['content']))# max character count for messages is 2000. if the output is greater, split it into multiple messages
-                            
-                            print("Ran and sent task")
+                            if response[0] == -1:
+                                embed = discord.Embed(title="Message failed OpenAI moderation check. Please comply with OpenAI usage policies.", color = discord.Colour.red())
+                                await message.channel.send(embed=embed)
+                            elif response[0] == -2:
+                                if len(response[1]) > 1:
+                                    embed = discord.Embed(title="An error occurred.", description=f"Error: Too many tokens requested. Please use ```/clearmessagehistory``` or reduce max tokens in ```/settings```", color=discord.Colour.red())
+                                else:
+                                    embed = discord.Embed(title="An error occurred. Please try again.", description="Error: Response took too long.", color=discord.Colour.red())
+                                await message.channel.send(embed=embed)
+                            else:
+                                await messagehandler.send_channel_msg(message.channel, str(response[1]['message']['content']))# max character count for messages is 2000. if the output is greater, split it into multiple messages
+                                print("Ran and sent task")
                         except Exception as e:
-                            print(e )
+                            print("responseseses error")
+                            print(e)
                         
 
 @bot.event
 async def on_message(message):
     current_time = time.strftime("%H:%M:%S", time.localtime())
-    
     try:
         current_server = await jsonhandler.get_server(message) # get Server that the message is from
-        
         # process commands only if message author is admin, owner, or if no admins are set.
-        if (message.content[0:3].lower() == 'ai.' or message.content[0] == '/') and (not current_server.adminroles or message.author.id == message.guild.owner.id or any(role in current_server.adminroles for role in message.author.roles)):
+        if (not current_server.adminroles or message.author.id == message.guild.owner.id or any(role in current_server.adminroles for role in message.author.roles)):
             await bot.process_commands(message)
-            print(f"\n{current_time} {message.content}\n(server: '{message.guild.name}', channel: '{message.channel.name}')")
-            return
         if message.author == bot.user: # don't process bot messages (may change later)
             return
-        
-        print(f"\n{current_time} {message.content}\n(server: '{message.guild.name}', channel: '{message.channel.name}')")
+        print(f"\n{current_time} {message.author.name}: {message.content}\n(server: '{message.guild.name}', channel: '{message.channel.name}')")
         await process_ai_response(current_server, message)
     except Exception as e:
+        print("main error")
         print(e)
     
 
