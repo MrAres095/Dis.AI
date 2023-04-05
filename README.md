@@ -5,6 +5,7 @@ Dis.AI is a Discord bot that enables users to create and customize chatbots on t
 ## Features
 - Multiple chatbots on a single Discord server
 - Fully customizable parameters for each chatbot, including prompt, temperature, penalties, and more
+  - See /help for a list of all commands and /help settings to learn more about each setting
 - Websearch capabilities
   - Get access to weather, news, or any other up-to-date information
 - Full control over chatbot outputs, including the ability to insert your own example messages for better prompting.
