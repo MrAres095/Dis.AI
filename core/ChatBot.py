@@ -1,9 +1,9 @@
 class ChatBot():
     def __init__(self, name="", 
                  prompt="Act as a snarky, sarcastic, arrogant, witty AI named Jarvis. Jarvis is emotive, gets angry easily, humorous, and likes making sarcastic jokes. He treats everything like a joke. He is very ironic in his responses. Only respond how Jarvis would.", 
-                 model="gpt-3.5-turbo", max_tokens=2064, temperature=0.4, top_p=1, n=1, presence_penalty=0.9,
-                 frequency_penalty=0.9, enabled=True, channels=[], server_id=0, max_message_history_length = 20, 
-                 prompt_reminder_interval=0, include_usernames=True, prefixes=[]):
+                 model="gpt-3.5-turbo", max_tokens=1500, temperature=0.6, top_p=1, n=1, presence_penalty=0.7,
+                 frequency_penalty=0.9, enabled=True, channels=[], server_id=0, max_message_history_length=10, 
+                 prompt_reminder_interval=0, include_usernames=True, prefixes=[], search_prefixes=["search"]):
         self.name = name
         self.model = model
         self.prompt = prompt
@@ -22,6 +22,8 @@ class ChatBot():
         self.prompt_reminder_interval = prompt_reminder_interval
         self.include_usernames = include_usernames
         self.prefixes=prefixes
+        self.search_prefixes=search_prefixes
+        self.bing_bots = {}
         
     def setName(self, name):
         self.name = str(name)
@@ -150,4 +152,17 @@ class ChatBot():
             self.prefixes.remove(prefix)
             return True
         return False
+    
+    def addsearchprefix(self, prefix):
+        if isinstance(prefix, str) and prefix not in self.search_prefixes:
+            self.search_prefixes.append(prefix)
+            return True
+        return False
+        
+    def removesearchprefix(self, prefix):
+        if isinstance(prefix, str) and prefix in self.search_prefixes:
+            self.search_prefixes.remove(prefix)
+            return True
+        return False
+        
         

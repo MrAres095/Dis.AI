@@ -6,9 +6,10 @@ from discord import ui
 import json
 import extensions.lists as lists
 from extensions.uiactions import *
+import utils.messagehandler as messagehandler
 import core.ChatBot as ChatBot
-from utils.jsonhandler import *
-from utils.messagehandler import *
+from EdgeGPT import Chatbot, ConversationStyle
+from config import COOKIES
 
 # commands that change a chatbot's settings
 class ChatBotSettings(commands.Cog):
@@ -24,7 +25,7 @@ class ChatBotSettings(commands.Cog):
     @app_commands.command(name="listchatbots", description="Lists all created chatbots")
     async def listchatbots(self, interaction: discord.Interaction) -> None:
         embed = discord.Embed(title="List of chatbots", colour=Colour.blue())
-        for bot in lists.bot_instances[str(interaction.guild.id)]:
+        for bot in lists.bot_instances[interaction.guild.id]:
             embed.add_field(name=bot.name, value="", inline=False)
         await interaction.response.send_message(embed=embed)
         
@@ -35,11 +36,12 @@ class ChatBotSettings(commands.Cog):
         
     @app_commands.command(name="settings", description="Change the settings for a specified chatbot\nType '/help settings' to learn about each setting.")
     async def settings(self, interaction:discord.Interaction) -> None:
-        try:
-            sett = SettingsView(interaction)
-            await interaction.response.send_message(view=sett)  
-        except Exception as e:
-            print(e)
+        if not lists.bot_instances[interaction.guild.id]:
+            embed = discord.Embed(title="Error", description="No chatbots currently exist\nCreate a chatbot with ```/createchatbot```", color=Colour.red())
+            await interaction.response.send_message(embed=embed)
+            return
+        sett = SettingsView(interaction)
+        await interaction.response.send_message(view=sett)  
             
     @app_commands.command(name="chatbotinfo", description="Shows all settings for the specified chatbot")
     async def chatbotinfo(self, interaction:discord.Interaction, chatbot_name: str) -> None:
@@ -57,6 +59,7 @@ class ChatBotSettings(commands.Cog):
 **Enabled:** {cb.enabled}
 **Allowed Channels:** {", ".join(channels)}
 **Prefixes:** {", ".join(cb.prefixes)}
+**Search Prefixes:** {", ".join(cb.search_prefixes)}
 **Include usernames:** {cb.include_usernames}
 
 __**Output Generation**__
@@ -68,15 +71,20 @@ __**Output Generation**__
 **Max Message History Length:** {cb.max_message_history_length}
 **Prompt Reminder Interval:** {cb.prompt_reminder_interval}
             """
-            await send_msg(interaction, out)
+            await messagehandler.send_msg(interaction, out)
         except Exception as e:
             print(e)
     
     @app_commands.command(name="showenabledhere", description="Shows all chatbots that are enabled in the current channel")
     async def showenabledhere(self, interaction:discord.Interaction) -> None:
-        server = await get_server(interaction)
-        embed = discord.Embed(title="List of chatbots enabled in current channel", description="\n".join([cb.name for cb in lists.bot_instances[str(interaction.guild.id)] if interaction.channel.id in cb.channels]), colour=Colour.blue())
-        await interaction.response.send_message(embed=embed)
+        try:
+            server = await get_server(interaction)
+            print(server)
+            print("above is server")
+            embed = discord.Embed(title="List of chatbots enabled in current channel", description="\n".join([cb.name for cb in lists.bot_instances[interaction.guild.id] if interaction.channel.id in cb.channels]), colour=Colour.blue())
+            await interaction.response.send_message(embed=embed)
+        except Exception as e:
+            print(e)
         
     @app_commands.command(name="enablehere", description = "Enables the specified chatbot in the current channel")
     async def enablehere(self, interaction:discord.Interaction, chatbot_name: str) -> None:
@@ -85,14 +93,16 @@ __**Output Generation**__
             embed = discord.Embed(title="Error. Bot does not exist.", description="Please make sure you have entered the name correctly\nUse /listchatbots to see all created chatbots.", colour=Colour.red())
             await interaction.response.send_message(embed=embed)
             return
-        if interaction.channel.id not in cb.channels:  
+        if interaction.channel.id not in cb.channels:
                 cb.channels.append(interaction.channel.id)
-                await update_bot_json(interaction.guild.id, await make_bot_dict(cb))
+                cb.bing_bots[interaction.channel.id] = Chatbot(cookies=COOKIES)
+                await change_cb_setting_in_db(interaction.guild.id, cb.name, "channels", cb.channels)
                 embed = discord.Embed(title=f"{cb.name} has been added to the current channel", colour=Colour.blue())
                 await interaction.response.send_message(embed=embed)
         else:
             embed = discord.Embed(title=f"{cb.name} has already been added to the current channel", colour=Colour.blue())
-            await interaction.response.send_message.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
+
         
     @app_commands.command(name="disablehere", description="Disables the specified chatbot from the current channel.")
     async def disablehere(self, interaction: discord.Interaction, chatbot_name: str) -> None:
@@ -102,7 +112,8 @@ __**Output Generation**__
             await interaction.response.send_message(embed=embed)
             return
         cb.channels.remove(interaction.channel.id)
-        await update_bot_json(interaction.guild.id, await make_bot_dict(cb))
+        cb.bing_bots.pop(interaction.channel.id)
+        await change_cb_setting_in_db(interaction.guild.id, cb.name, "channels", cb.channels)
         embed = discord.Embed(title=f"{cb.name} has been removed from the current channel", colour=Colour.blue())
         await interaction.response.send_message(embed=embed)
 
@@ -129,52 +140,51 @@ __**Output Generation**__
             embed = discord.Embed(title=f"Cleared message history for {cb.name}", description=f"{ctxlen} messages deleted", colour=Colour.blue())
             await interaction.response.send_message(embed=embed)
             
-    @app_commands.command(name="includeusernames", description = "Allows the specified chatbot to recognize usernames")
-    async def includeusernames(self, interaction: discord.Interaction, chatbot_name: str, shouldiu: str) -> None:
-        cb = await get_cb(interaction, chatbot_name)
-        if not cb:
-            embed = discord.Embed(title=f"Invalid name. Please try again", description="Example:\nai.rmh Storywriter 4", colour=Colour.red())
-            await interaction.response.send_message(embed=embed)
-            return
-        shouldiu = shouldiu.lower()
-        if shouldiu == 't' or shouldiu == "true" or shouldiu == "on":
-            shouldiu = True
-        elif shouldiu == 'f' or shouldiu == "false" or shouldiu == "off":
-            shouldiu = False
-        else:
-            embed = discord.Embed(title=f"Error", description="Include usernames must be either true or false", colour=Colour.red())
-            await interaction.response.send_message(embed=embed)
-            return
             
-        if cb.set_include_usernames(shouldiu):
-            await update_bot_json(interaction.guild.id, await make_bot_dict(cb))
-            embed = discord.Embed(title=f"Include usernames changed for {cb.name}", description=f"Include usernames is now:\n{str(shouldiu)}", colour=Colour.blue())
-        else:
-            embed = discord.Embed(title=f"Error", colour=Colour.red())
-        await interaction.response.send_message(embed=embed)    
-    
     @app_commands.command(name="deletechatbot", description = "Delete a chatbot")
     async def deletechatbot(self, interaction: discord.Interaction) -> None:
+        if not lists.bot_instances[interaction.guild.id]:
+                embed = discord.Embed(title="Error", description="No chatbots currently exist\nCreate a chatbot with ```/createchatbot```", color=Colour.red())
+                await interaction.response.send_message(embed=embed)
+                return
         await interaction.response.send_message(view=DeleteChatView(interaction))
 
     
     @app_commands.command(name="removeprefix", description="Removes the selected prefixes from the specified chatbot\nSee '/help settings' for details on prefixes")
-    async def removeprefix(self, interaction: discord.Interaction) -> None:
-        await interaction.response.send_message(view=RemovePrefixView)
+    async def removeprefix(self, interaction: discord.Interaction, cbname: str) -> None:
+        if not lists.bot_instances[interaction.guild.id]:
+            embed = discord.Embed(title="Error", description="No chatbots currently exist\nCreate a chatbot with ```/createchatbot```", color=Colour.red())
+            await interaction.response.send_message(embed=embed)
+            return
+        cb = await get_cb(interaction, cbname)
+        if not cb or not cb.prefixes:
+            embed = discord.Embed(title="Error", description="This chatbot currently has no prefixes\nAdd prefixes using ```/settings```", color=Colour.red())
+            await interaction.response.send_message(embed=embed)
+            return
+            
+        await interaction.response.send_message(view=RemovePrefixView(interaction, cb))
         
     @app_commands.command(name="setdefault", description="Resets all settings for the specified chatbot to default")
     async def setdefault(self, interaction: discord.Interaction, chatbot_name: str) -> None:
-
         cb = await get_cb(interaction, chatbot_name)
         if not cb:
             embed = discord.Embed(title="Error", description="Please make sure you have entered the name correctly and try again.", colour=Colour.red())
             await interaction.response.send_message(embed=embed)
             return
         newcb = ChatBot.ChatBot(name=cb.name)
-        lists.bot_instances[str(interaction.guild.id)].remove(cb)
-        lists.bot_instances[str(interaction.guild.id)].append(newcb)
-        await update_bot_json(interaction.guild.id, await make_bot_dict(newcb))
-        embed = discord.Embed(title=f"Successfully Reset Chatbot", description=f"All settings for {newcb.name} has been reset to default\n'/chatbotinfo {newcb.name}' to see its settings.", colour=Colour.blue())
+        lists.bot_instances[interaction.guild.id][lists.bot_instances[interaction.guild.id].index(cb)] = newcb
+        
+        await remove_cb_from_db(interaction.guild.id, cb.name)
+        await add_cb_to_db(interaction.guild.id, await make_bot_dict(newcb))
+        cb = None
+        embed = discord.Embed(title=f"Successfully Reset Chatbot", description=f"All settings for {newcb.name} has been reset to default\n```/chatbotinfo {newcb.name}``` to see its settings and ```/enablehere {newcb.name}``` to enable it in the current channel.", colour=Colour.blue())
         await interaction.response.send_message(embed=embed)
+
+    @app_commands.command(name="forcemessage", description="Forces a message from the specified chatbot.")
+    async def forcemessage(self, interaction: discord.Interaction, chatbot_name: str) -> None:   
+        cb = await get_cb(interaction, chatbot_name)
+        current_server = await get_server(interaction) # get Server that the message is from
+        await force_ai_response(interaction, cb)
+
 async def setup(bot):
     await bot.add_cog(ChatBotSettings(bot))

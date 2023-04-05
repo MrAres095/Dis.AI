@@ -1,22 +1,21 @@
-import os
 import openai
-import discord
-from config import OPENAI_API_KEY
+from EdgeGPT import Chatbot, ConversationStyle
+import json
+from config import OPENAI_API_KEY, COOKIES
 import openai_async
-
+import asyncio
 openai.api_key = OPENAI_API_KEY
 
+async def get_bing_response(question, bingbot):
+    result = await bingbot.ask(prompt=question, conversation_style=ConversationStyle.creative, wss_link="wss://sydney.bing.com/sydney/ChatHub")
+    out = result['item']['messages'][1]['text'] + "\n"
+    out += "Sources:\n"
+    for url in result['item']['messages'][1]['sourceAttributions']:
+            out += "\n" + url['seeMoreUrl']
+            
+    return out
 
 async def get_response(cb, message):
-    try:
-        errors = await get_moderation(message.content) # check for moderation
-    except Exception as e:
-        print("Moderation error")
-        print(e)
-    if errors:
-        del cb.context[-1]
-        return (-1, str(errors))
-    
     # build the messages
     while (len(cb.context) > cb.max_message_history_length): # trim cb.context (excluding prompt) if it's >= mmhl
         del cb.context[1:3]

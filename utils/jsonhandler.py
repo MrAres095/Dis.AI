@@ -1,15 +1,77 @@
+import pymongo
 import json
 import extensions.lists as lists
+from config import MONGO_LINK, COOKIES
+import core.ChatBot as ChatBot
+import core.Server as Server
+from EdgeGPT import Chatbot
 
+mongoclient = pymongo.MongoClient(MONGO_LINK)
+db = mongoclient["DisAI"]
+print("created mongo client")
+
+async def checkdb(bot):
+    for guild in bot.guilds:
+        await add_guild_to_db(guild)
+
+async def add_guild_to_db(guild):
+    if not [gid for gid in db.servers.find({"_id": guild.id})]:
+            newbot = ChatBot.ChatBot(name="Jarvis")
+            newserver = Server.Server(id=guild.id)
+            lists.servers.append(newserver)
+            lists.bot_instances[guild.id] = [newbot]
+            def_bot = await make_bot_dict(newbot)
+            def_settings = await make_settings_dict(newserver)
+            db.servers.insert_one({
+                "_id": guild.id,
+                "server_name": guild.name,
+                "settings": def_settings,
+                "bots": [def_bot]
+                })
+
+async def load_db_to_mem(guilds):
+    # add all ChatBots to lists.bot_instances and servers to lists.servers
+    lists.servers.clear()
+    lists.bot_instances.clear()
+    for server in db.servers.find():
+        if server['_id'] not in [server.id for server in lists.servers]:
+            lists.servers.append(Server.Server(id=server['_id'], adminroles=server['settings']['adminroles'], allowedroles=server['settings']['allowedroles']))
+            lists.bot_instances[server['_id']] = []
+
+        for b in server['bots']:
+            if b['name'] not in [bot.name for bot in lists.bot_instances[server['_id']]]:
+                lists.bot_instances[server['_id']].append(ChatBot.ChatBot(name=b['name'], prompt=b['prompt'], max_tokens=b['max_tokens'],
+                                            temperature=b['temperature'], top_p=b['top_p'], n=b['n'],
+                                            presence_penalty=b['presence_penalty'],
+                                            frequency_penalty=b['frequency_penalty'], enabled=b['enabled'],
+                                            channels=b['channels'], server_id=server['_id'], 
+                                            max_message_history_length=b['max_message_history_length'],
+                                            prompt_reminder_interval=b['prompt_reminder_interval'], 
+                                            include_usernames=b['include_usernames'], prefixes=b['prefixes'], search_prefixes=b['search_prefixes']))
+                
+                for channelid in lists.bot_instances[server['_id']][-1].channels:
+                    lists.bot_instances[server['_id']][-1].bing_bots[channelid] = Chatbot(cookies=COOKIES)
+                
+async def add_cb_to_db(guildid, dict):
+    db.servers.update_one({"_id": guildid}, {"$push": {"bots": dict}})
+
+async def remove_cb_from_db(guildid, botname):
+    db.servers.update_one({"_id": guildid}, {"$pull": {"bots": {"name": botname}}})
+    
+async def change_cb_setting_in_db(guildid, botname, setting, newvalue):
+        db.servers.update_one({"_id": guildid, "bots": { "$elemMatch": { "name": botname } }}, {"$set": { f"bots.$.{setting}": newvalue } })
+    
+async def change_server_setting_in_db(guildid, setting, newvalue):
+    db.servers.update_one({"_id": guildid}, {"$set": { f"settings.{setting}": newvalue } })
+    
 async def get_cb(ctx, name):
     # get the chatbot to edit
     cb_to_edit = None
     if isinstance(name, str):
-        for chatbot in lists.bot_instances[str(ctx.guild.id)]:
+        for chatbot in lists.bot_instances[ctx.guild.id]:
             if chatbot.name.lower() == name.strip().lower():
-                cb_to_edit = chatbot
-                break
-    return cb_to_edit
+                return chatbot
+    return None
 
 async def get_server(ctx):
     server_to_edit = None
@@ -37,61 +99,13 @@ async def make_bot_dict(chatbot):
         "max_message_history_length": chatbot.max_message_history_length,
         "prompt_reminder_interval":chatbot.prompt_reminder_interval,
         "include_usernames": chatbot.include_usernames,
-        "prefixes":chatbot.prefixes
+        "prefixes":chatbot.prefixes,
+        "search_prefixes":chatbot.search_prefixes
         }
     return dict
-
-async def update_bot_json(server_id, bot):
-    # updates the json file
-    data = None
-    server_id = str(server_id)
-    with open('data.json', 'r') as f:
-        data = json.load(f)
-    b_list = data[server_id]['bots']
-    for i in range(len(b_list)):
-        if (b_list[i]['name'] == bot['name']):
-            data[server_id]['bots'][i] = bot
-            break 
-    else:
-        data[server_id]['bots'].append(bot)
-
-    with open('data.json', 'w') as f:
-        f.write(json.dumps(data, indent=4))
-        
-async def delete_bot_json(server_id, bot):
-    # deletes bot from json file
-    data = None
-    server_id = str(server_id)
-    with open('data.json', 'r') as f:
-        data = json.load(f)
-    
-    for chatbot in data[server_id]['bots']:
-        if chatbot['name'] == bot['name']:
-            data[server_id]['bots'].remove(bot)
-            break
-    else:
-        return False
-        
-
-    with open('data.json', 'w') as f:
-        f.write(json.dumps(data, indent=4))
-    return True
-    
-        
-async def update_server_json(server_id, settings_dict):
-    # updates the json file
-    data = None
-    server_id = str(server_id)
-    with open('data.json', 'r') as f:
-        data = json.load(f)
-    data[server_id]['settings'] = settings_dict
-    
-
-    with open('data.json', 'w') as f:
-        f.write(json.dumps(data, indent=4))
         
 async def make_settings_dict(Server):   
     settings_dict = {
-        'id':Server.id, 'adminroles':Server.adminroles, 'allowedroles': Server.allowedroles
+        'adminroles':Server.adminroles, 'allowedroles': Server.allowedroles
         }
     return settings_dict

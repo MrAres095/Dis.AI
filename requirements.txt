@@ -2,5 +2,6 @@ discord
 asyncio
 aiofiles
 openai
-colorama
 openai-async
+pymongo
+EdgeGPT
