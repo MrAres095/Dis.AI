@@ -1,0 +1,7 @@
+discord
+asyncio
+aiofiles
+openai
+openai-async
+pymongo
+EdgeGPT
