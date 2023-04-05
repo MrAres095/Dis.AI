@@ -74,10 +74,16 @@ async def reload(ctx):
 
 @bot.event
 async def on_ready():
-    game = discord.Game("/createchatbot")
-    await bot.change_presence(status=discord.Status.online, activity=game)
-    await jsonhandler.checkdb(bot)
-    await jsonhandler.load_db_to_mem(bot.guilds)
+    try:
+        game = discord.Game("/createchatbot")
+        await bot.change_presence(status=discord.Status.online, activity=game)
+        await jsonhandler.checkdb(bot)
+        print("finished checkdb")
+        await jsonhandler.load_db_to_mem(bot.guilds)
+        print("finished load mem")
+    except Exception as e:
+        print("on ready err")
+        print(e)
     
 @bot.event
 async def on_guild_join(guild):
