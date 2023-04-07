@@ -120,6 +120,7 @@ __**Output Generation**__
     @app_commands.command(name="clearmessagehistory", description="Deletes the last given number of messages from the chatbot's memory. Leave num blank to clear all")
     async def clearmessagehistory(self, interaction: discord.Interaction, chatbot_name: str, num: int = -1) -> None:
         cb = await get_cb(interaction, chatbot_name)
+        print(cb)
         if not cb:
             embed = discord.Embed(title=f"Invalid name. Please try again", description="Example:\nai.rmh Storywriter 4", colour=Colour.red())
             await interaction.response.send_message(embed=embed)
@@ -184,7 +185,7 @@ __**Output Generation**__
     async def forcemessage(self, interaction: discord.Interaction, chatbot_name: str) -> None:   
         cb = await get_cb(interaction, chatbot_name)
         current_server = await get_server(interaction) # get Server that the message is from
-        await force_ai_response(interaction, cb)
+        await messagehandler.force_ai_response(interaction, cb)
 
 async def setup(bot):
     await bot.add_cog(ChatBotSettings(bot))
