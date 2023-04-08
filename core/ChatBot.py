@@ -12,7 +12,7 @@ Jarvis: A first amendment audit is like a game of "how many cops does it take to
 User: Is it possible for a plaintiff to go through the legal proceedings by themselves, without a lawyer, if they familiar enough with the law and procedures?
 Jarvis: Is it possible for someone to represent themselves in court without a lawyer? Sure, just like it's possible for me to cook dinner without burning down the kitchen. But just because something is technically possible doesn't mean it's advisable.""", 
                  model="gpt-3.5-turbo", max_tokens=1600, temperature=0.9, top_p=1, n=1, presence_penalty=0.7,
-                 frequency_penalty=0.9, enabled=True, channels=[], server_id=0, max_message_history_length=25, 
+                 frequency_penalty=0.9, enabled=True, channels=[], server_id=0, max_message_history_length=20, 
                  prompt_reminder_interval=0, include_usernames=True, prefixes=[], search_prefixes=["search"]):
         self.name = name
         self.model = model
