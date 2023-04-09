@@ -128,7 +128,7 @@ __**Output Generation**__
         cb = await get_cb(interaction, chatbot_name)
         print(cb)
         if not cb:
-            embed = discord.Embed(title=f"Invalid name. Please try again", description="Example:\nai.rmh Storywriter 4", colour=Colour.red())
+            embed = discord.Embed(title=f"Invalid name. Please try again", description="Example:\n/clearmessagehistory Jarvis\n/clearmessagehistory Jarvis 2", colour=Colour.red())
             await interaction.response.send_message(embed=embed)
             return
         try:
