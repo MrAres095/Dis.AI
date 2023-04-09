@@ -40,17 +40,21 @@ async def load_db_to_mem(guilds):
 
         for b in server['bots']:
             if b['name'] not in [bot.name for bot in lists.bot_instances[server['_id']]]:
-                lists.bot_instances[server['_id']].append(ChatBot.ChatBot(name=b['name'], prompt=b['prompt'], max_tokens=b['max_tokens'],
+                nb = ChatBot.ChatBot(name=b['name'], prompt=b['prompt'], max_tokens=b['max_tokens'],
                                             temperature=b['temperature'], top_p=b['top_p'], n=b['n'],
                                             presence_penalty=b['presence_penalty'],
                                             frequency_penalty=b['frequency_penalty'], enabled=b['enabled'],
                                             channels=b['channels'], server_id=server['_id'], 
                                             max_message_history_length=b['max_message_history_length'],
                                             prompt_reminder_interval=b['prompt_reminder_interval'], 
-                                            include_usernames=b['include_usernames'], prefixes=b['prefixes'], search_prefixes=b['search_prefixes']))
+                                            include_usernames=b['include_usernames'], prefixes=b['prefixes'], search_prefixes=b['search_prefixes'], context=b['context'])
+                lists.bot_instances[server['_id']].append(nb)
                 
                 for channelid in lists.bot_instances[server['_id']][-1].channels:
-                    lists.bot_instances[server['_id']][-1].bing_bots[channelid] = Chatbot(cookies=COOKIES)
+                    try:
+                        lists.bot_instances[server['_id']][-1].bing_bots[channelid] = Chatbot(cookies=COOKIES)
+                    except Exception as e:
+                        print("bingbot failed")
                 
 async def add_cb_to_db(guildid, dict):
     db.servers.update_one({"_id": guildid}, {"$push": {"bots": dict}})
@@ -100,7 +104,8 @@ async def make_bot_dict(chatbot):
         "prompt_reminder_interval":chatbot.prompt_reminder_interval,
         "include_usernames": chatbot.include_usernames,
         "prefixes":chatbot.prefixes,
-        "search_prefixes":chatbot.search_prefixes
+        "search_prefixes":chatbot.search_prefixes,
+        "context": chatbot.context
         }
     return dict
         

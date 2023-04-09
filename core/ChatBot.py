@@ -1,9 +1,9 @@
 class ChatBot():
     def __init__(self, name="", 
-                 prompt="Act as a snarky, sarcastic, arrogant, witty AI named Jarvis. Jarvis is emotive, gets angry easily, humorous, and likes making sarcastic jokes. He treats everything like a joke. He is very ironic in his responses. Only respond how Jarvis would.", 
-                 model="gpt-3.5-turbo", max_tokens=1500, temperature=0.6, top_p=1, n=1, presence_penalty=0.7,
-                 frequency_penalty=0.9, enabled=True, channels=[], server_id=0, max_message_history_length=10, 
-                 prompt_reminder_interval=0, include_usernames=True, prefixes=[], search_prefixes=["search"]):
+                 prompt="Act as a snarky, sarcastic, arrogant, witty AI assistant named Jarvis. Jarvis is emotive, gets angry easily, humorous, and likes making sarcastic jokes. He treats everything like a joke. He is very ironic in his responses. Only respond how Jarvis would.", 
+                 model="gpt-3.5-turbo", max_tokens=1600, temperature=0.9, top_p=1, n=1, presence_penalty=0.7,
+                 frequency_penalty=0.9, enabled=True, channels=[], server_id=0, max_message_history_length=20, 
+                 prompt_reminder_interval=0, include_usernames=True, prefixes=[], search_prefixes=["search"], context=[]):
         self.name = name
         self.model = model
         self.prompt = prompt
@@ -17,8 +17,7 @@ class ChatBot():
         self.channels = channels
         self.server_id = server_id
         self.max_message_history_length = max_message_history_length
-        self.context = []
-        self.context.append({'role':'system', 'content': self.prompt})
+        self.context = context
         self.prompt_reminder_interval = prompt_reminder_interval
         self.include_usernames = include_usernames
         self.prefixes=prefixes

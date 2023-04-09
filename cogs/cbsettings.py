@@ -88,20 +88,26 @@ __**Output Generation**__
         
     @app_commands.command(name="enablehere", description = "Enables the specified chatbot in the current channel")
     async def enablehere(self, interaction:discord.Interaction, chatbot_name: str) -> None:
-        cb = await get_cb(interaction, chatbot_name)
-        if not cb:
-            embed = discord.Embed(title="Error. Bot does not exist.", description="Please make sure you have entered the name correctly\nUse /listchatbots to see all created chatbots.", colour=Colour.red())
-            await interaction.response.send_message(embed=embed)
-            return
-        if interaction.channel.id not in cb.channels:
-                cb.channels.append(interaction.channel.id)
-                cb.bing_bots[interaction.channel.id] = Chatbot(cookies=COOKIES)
-                await change_cb_setting_in_db(interaction.guild.id, cb.name, "channels", cb.channels)
-                embed = discord.Embed(title=f"{cb.name} has been added to the current channel", colour=Colour.blue())
+        try:
+            cb = await get_cb(interaction, chatbot_name)
+            if not cb:
+                embed = discord.Embed(title="Error. Bot does not exist.", description="Please make sure you have entered the name correctly\nUse /listchatbots to see all created chatbots.", colour=Colour.red())
                 await interaction.response.send_message(embed=embed)
-        else:
-            embed = discord.Embed(title=f"{cb.name} has already been added to the current channel", colour=Colour.blue())
-            await interaction.response.send_message(embed=embed)
+                return
+            if interaction.channel.id not in cb.channels:
+                    cb.channels.append(interaction.channel.id)
+                    try:
+                        cb.bing_bots[interaction.channel.id] = Chatbot(cookies=COOKIES)
+                    except Exception as e:
+                        print("enable here bingbots err")
+                    await change_cb_setting_in_db(interaction.guild.id, cb.name, "channels", cb.channels)
+                    embed = discord.Embed(title=f"{cb.name} has been added to the current channel", colour=Colour.blue())
+                    await interaction.response.send_message(embed=embed)
+            else:
+                embed = discord.Embed(title=f"{cb.name} has already been added to the current channel", colour=Colour.blue())
+                await interaction.response.send_message(embed=embed)
+        except Exception as e:
+            print(e)
 
         
     @app_commands.command(name="disablehere", description="Disables the specified chatbot from the current channel.")
@@ -120,8 +126,9 @@ __**Output Generation**__
     @app_commands.command(name="clearmessagehistory", description="Deletes the last given number of messages from the chatbot's memory. Leave num blank to clear all")
     async def clearmessagehistory(self, interaction: discord.Interaction, chatbot_name: str, num: int = -1) -> None:
         cb = await get_cb(interaction, chatbot_name)
+        print(cb)
         if not cb:
-            embed = discord.Embed(title=f"Invalid name. Please try again", description="Example:\nai.rmh Storywriter 4", colour=Colour.red())
+            embed = discord.Embed(title=f"Invalid name. Please try again", description="Example:\n/clearmessagehistory Jarvis\n/clearmessagehistory Jarvis 2", colour=Colour.red())
             await interaction.response.send_message(embed=embed)
             return
         try:
@@ -184,7 +191,15 @@ __**Output Generation**__
     async def forcemessage(self, interaction: discord.Interaction, chatbot_name: str) -> None:   
         cb = await get_cb(interaction, chatbot_name)
         current_server = await get_server(interaction) # get Server that the message is from
-        await force_ai_response(interaction, cb)
+        await messagehandler.force_ai_response(interaction, cb)
 
+    @app_commands.command(name="insertmessage", description="Shows all chatbots that are enabled in the current channel")
+    async def insertmessage(self, interaction:discord.Interaction, chatbot_name: str) -> None:
+        cb = await get_cb(interaction, chatbot_name)
+        if not cb:
+            embed = discord.Embed(title="Error", description="Please make sure you have entered the name correctly and try again.", colour=Colour.red())
+            await interaction.response.send_message(embed=embed)
+            return
+        await interaction.response.send_modal(IMModal(cb))
 async def setup(bot):
     await bot.add_cog(ChatBotSettings(bot))

@@ -20,6 +20,9 @@ helpEmbed1.add_field(name="```/disablehere (chatbot name)```", inline=False,
 helpEmbed1.add_field(name="```/clearmessagehistory (chatbotname) <(optional) number of messages to delete >```", inline=False,
                 value="Deletes the last given number of messages from the chatbot's memory. To clear all messages, don't enter any number.")
 
+helpEmbed1.add_field(name="```/Insert Message (chatbotname)```", inline=False,
+                value="Manually inserts the given message into the chatbot's message history. Possible role inputs:\n'user' role simulates a user message\n'assistant' role simulates a chatbot message\n'system' role simulates a system message (like prompt)")
+
 helpEmbed1.add_field(name="```/listchatbots```", inline=False,
                      value="Lists all created chatbots")
 
@@ -39,9 +42,6 @@ helpEmbed2 = discord.Embed(title="/settings help", description="", colour=discor
 helpEmbed2.set_thumbnail(url='https://github.com/jacobjude/Dis.AI/blob/master/icon.png?raw=true')
 helpEmbed2.add_field(name="```Prompt```", inline=False,
                 value="Changes the prompt of the selected chatbot. This is the heart of Dis.AI. Great prompting yields great results.")
-
-helpEmbed2.add_field(name="```Insert Message```", inline=False,
-                value="Manually inserts the given message into the chatbot's message history. Possible role inputs:\n'user' role simulates a user message\n'assistant' role simulates a chatbot message\n'system' role simulates a system message (like prompt)")
 
 helpEmbed2.add_field(name="```Message History Length```", inline=False,
                 value="The maximum number of messages the chatbot can store in memory. Higher values may use more tokens.\n")

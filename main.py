@@ -52,9 +52,14 @@ async def shutdown(ctx):
     if ctx and not ctx.author.id == 215199288177721344:
         return
     print("shutdown")
-    await responses.shutbot()
-    await bot.close()
-    raise SystemExit(0)
+    try:
+        for server in bot_instances:
+            for chatbot in bot_instances[server]:
+                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "context", chatbot.context)
+        await bot.close()
+        raise SystemExit(0)
+    except Exception as e:
+        print(e)
 
         
 # load and unload
@@ -94,6 +99,7 @@ async def on_guild_join(guild):
 async def on_message(message):
     if message.author == bot.user: # don't process bot messages (may change later)
         return
+    
     current_time = time.strftime("%H:%M:%S", time.localtime())
     current_server = await jsonhandler.get_server(message) # get Server that the message is from
     print(f"\n{current_time} {message.author.name}: {message.content}\n(server: '{message.guild.name}', channel: '{message.channel.name}')")
@@ -103,8 +109,10 @@ async def on_message(message):
             print("processing ai. command")
             await bot.process_commands(message)
             return
-    
-    await messagehandler.process_ai_response(current_server, message)
+    try:
+        await messagehandler.process_ai_response(current_server, message)
+    except Exception as e:
+        print(e)
 
 
 async def main():
