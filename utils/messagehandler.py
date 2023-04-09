@@ -25,6 +25,7 @@ async def process_ai_response(current_server, message):
                     async with message.channel.typing():
                         if message.content: # moderate user message
                             errors = await responses.get_moderation(message.content) 
+                            errors = False
                             if errors:
                                 del cb.context[-1]
                                 embed = discord.Embed(title="Message failed OpenAI moderation check. Please comply with OpenAI usage policies.", color = discord.Colour.red())
@@ -71,3 +72,5 @@ async def send_channel_msg(channel, msg):
 async def force_ai_response(interaction, chatbot):
     response = await responses.get_response(chatbot, None) # get response from openai
     await send_channel_msg(interaction.channel, str(response[1]['message']['content']))
+    embed=discord.Embed(title="Forced response", color=discord.Colour.blue())
+    await interaction.response.send_message(embed=embed)

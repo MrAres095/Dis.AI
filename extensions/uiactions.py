@@ -165,19 +165,27 @@ class IMModal(ui.Modal, title="Enter Message to Insert"):
     def __init__(self, cb):
         super().__init__()
         self.cb = cb
-        
-    role = ui.TextInput(label="Role", style=discord.TextStyle.short, placeholder="Possible roles: \"system\", \"assistant\", or \"user\"")
-    content = ui.TextInput(label="Message", style=discord.TextStyle.long)
+
+    content = ui.TextInput(label="Message", style=discord.TextStyle.long, placeholder="user: What's my name?\nsystem: User's name is bongo.\nassistant: Why, it's bongo, of course!")
     async def on_submit(self, interaction: discord.Interaction):
-        self.role = self.role.value.strip().lower()
-        self.content = self.content.value.strip()
-        if self.role == "system" or self.role == "assistant" or self.role == "user":
-            self.cb.context.append({'role':self.role,'content':self.content})
-            embed = discord.Embed(title=f"Successfully Inserted Message", description=f"Inserted {self.role} message into chat history:\n{self.content}", color=discord.Colour.blue())
-            await interaction.response.send_message(embed=embed)
-        else:
-            embed = discord.Embed(title=f"Error", description="Enter a valid role\nPossible roles: \"system\", \"assistant\", or \"user\"", color=discord.Colour.red())
-            await interaction.response.send_message(embed=embed)
+        lines = self.content.value.strip().split("\n")
+        print(lines)
+        linesAdded = 0
+        for line in lines:
+            line = line.split(":")
+            ctxrole = line[0].strip().lower()
+            print(ctxrole)
+            if ctxrole == "assistant" or ctxrole == "user" or ctxrole == "system": 
+                self.cb.context.append({'role':ctxrole, 'content': line[1].strip()})
+                linesAdded += 1
+            else:
+                embed = discord.Embed(title=f"Error", description=f"Invalid role entered\nPossible roles: \"system\", \"assistant\", or \"user\"\nMessages must be in format: role: message", color=discord.Colour.blue())
+                if linesAdded != 0:
+                    del self.cb.context[-1 * linesAdded:]
+                await interaction.response.send_message(embed=embed)
+        
+        embed = discord.Embed(title=f"Successfully Inserted Message", description=f"Inserted messages into {self.cb.name}'s chat history", color=discord.Colour.blue())
+        await interaction.response.send_message(embed=embed)
         
 class TempModal(ui.Modal, title="Enter New Temperature"):
     def __init__(self, cb):
