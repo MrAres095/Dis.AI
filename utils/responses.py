@@ -27,7 +27,7 @@ async def get_response(cb, message):
         else:
             cb.context.append({'role':'system', 'content': cb.prompt})
 
-    if cb.context[0]['role'] != 'system':
+    if not cb.context or cb.context[0]['role'] != 'system':
         cb.context.insert(0, {'role':'system', 'content':cb.prompt})
     
     

@@ -188,10 +188,10 @@ __**Output Generation**__
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="forcemessage", description="Forces a message from the specified chatbot.")
-    async def forcemessage(self, interaction: discord.Interaction, chatbot_name: str) -> None:   
+    async def forcemessage(self, interaction: discord.Interaction, chatbot_name: str, num_msgs: int) -> None:   
         cb = await get_cb(interaction, chatbot_name)
         current_server = await get_server(interaction) # get Server that the message is from
-        await messagehandler.force_ai_response(interaction, cb)
+        await messagehandler.force_ai_response(interaction, cb, num_msgs)
 
     @app_commands.command(name="insertmessage", description="Shows all chatbots that are enabled in the current channel")
     async def insertmessage(self, interaction:discord.Interaction, chatbot_name: str) -> None:
@@ -201,5 +201,8 @@ __**Output Generation**__
             await interaction.response.send_message(embed=embed)
             return
         await interaction.response.send_modal(IMModal(cb))
+        
+
+        
 async def setup(bot):
     await bot.add_cog(ChatBotSettings(bot))

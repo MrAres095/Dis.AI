@@ -69,8 +69,14 @@ async def send_channel_msg(channel, msg):
     else:
         await channel.send(str(msg))
         
-async def force_ai_response(interaction, chatbot):
-    response = await responses.get_response(chatbot, None) # get response from openai
-    await send_channel_msg(interaction.channel, str(response[1]['message']['content']))
-    embed=discord.Embed(title="Forced response", color=discord.Colour.blue())
+async def force_ai_response(interaction, chatbot, numTimes = 1):
+    
+    embed=discord.Embed(title="Forcing responses", color=discord.Colour.blue())
     await interaction.response.send_message(embed=embed)
+    try:
+        for i in range(numTimes):
+            response = await responses.get_response(chatbot, None) # get response from openai
+            await send_channel_msg(interaction.channel, str(response[1]['message']['content']))
+    except Exception as e:
+        print("far")
+        print(e)
