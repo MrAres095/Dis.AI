@@ -172,7 +172,7 @@ class IMModal(ui.Modal, title="Enter Message to Insert"):
         print(lines)
         linesAdded = 0
         for line in lines:
-            line = line.split(":")
+            line = line.split(":", 1)
             ctxrole = line[0].strip().lower()
             print(ctxrole)
             if ctxrole == "assistant" or ctxrole == "user" or ctxrole == "system": 
