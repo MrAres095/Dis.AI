@@ -4,7 +4,7 @@ import aiofiles
 import os
 import json
 from discord.ext import commands
-import time
+import datetime
 from EdgeGPT import Chatbot
 import utils.responses as responses
 from config import DISCORD_TOKEN, APPLICATION_ID
@@ -99,10 +99,11 @@ async def on_guild_join(guild):
 async def on_message(message):
     if message.author == bot.user: # don't process bot messages (may change later)
         return
-    
-    current_time = time.strftime("%H:%M:%S", time.localtime())
+    now = datetime.datetime.now()
+    formatted_date = now.strftime("%m/%d %H:%M:%S")
+
     current_server = await jsonhandler.get_server(message) # get Server that the message is from
-    print(f"\n{current_time} {message.author.name}: {message.content}\n(server: '{message.guild.name}', channel: '{message.channel.name}')")
+    print(f"\n{formatted_date} {message.author.name}: {message.content}\n(server: '{message.guild.name}', channel: '{message.channel.name}')")
     # process commands only if message author is admin, owner, or if no admins are set.
     if (not current_server.adminroles or message.author.id == message.guild.owner.id or any(role in current_server.adminroles for role in message.author.roles)):
         if message.content.startswith("ai."):

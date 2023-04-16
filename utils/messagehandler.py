@@ -23,6 +23,7 @@ async def process_ai_response(current_server, message):
                     should_search = True
                 if (should_search or not cb.prefixes or any(message.content.startswith(prefix) for prefix in cb.prefixes)):
                     async with message.channel.typing():
+                        print(f"{cb.name}: guild: Getting response")
                         if message.content: # moderate user message
                             errors = await responses.get_moderation(message.content) 
                             errors = False
@@ -36,8 +37,6 @@ async def process_ai_response(current_server, message):
                             print("getting bing response")
                             bing_response = await responses.get_bing_response(message.content.replace(search_prefix, "", 1).lstrip(), cb.bing_bots[message.channel.id])
                             cb.context.append({'role': 'system', 'content': f"A web search yielded the following result. With this new information, answer the user's question according to your original prompt and previous conversation messages.\n\"{bing_response}\""})
-                            print("got bing response and appended")
-                        print("getting response")
                         response = await responses.get_response(cb, message) # get response from openai
                         print("got response")
                         if response[0] == -1:

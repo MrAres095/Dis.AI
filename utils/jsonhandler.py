@@ -15,6 +15,8 @@ async def checkdb(bot):
         await add_guild_to_db(guild)
 
 async def add_guild_to_db(guild):
+    newbot = None
+    newserver = None
     if not [gid for gid in db.servers.find({"_id": guild.id})]:
             newbot = ChatBot.ChatBot(name="Jarvis")
             newserver = Server.Server(id=guild.id)
