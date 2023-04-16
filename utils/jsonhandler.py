@@ -56,7 +56,7 @@ async def load_db_to_mem(guilds):
                     try:
                         lists.bot_instances[server['_id']][-1].bing_bots[channelid] = Chatbot(cookies=COOKIES)
                     except Exception as e:
-                        print("bingbot failed")
+                        print(f"bingbot failed: {e}")
                 
 async def add_cb_to_db(guildid, dict):
     db.servers.update_one({"_id": guildid}, {"$push": {"bots": dict}})
