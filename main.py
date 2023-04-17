@@ -4,23 +4,68 @@ import aiofiles
 import os
 import json
 from discord.ext import commands
-import time
+from datetime import datetime, time, timezone
 from EdgeGPT import Chatbot
 import utils.responses as responses
-from config import DISCORD_TOKEN, APPLICATION_ID
+from config import DISCORD_TOKEN, APPLICATION_ID, DBL_TOKEN
 import extensions.helpembeds as helpembeds
 from extensions.lists import bot_instances, servers
 from utils import jsonhandler, messagehandler
+import pytz
+import topgg
+from discord.ext import tasks
+eastern = pytz.timezone('US/Eastern')
 
 # intents
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 intents.guilds = True
-background_tasks = set() # store api requests as tasks
+
+
+reset_time = time(hour=16, minute=00, tzinfo=timezone.utc)
 
 bot = commands.Bot(command_prefix='ai.', intents=intents, application_id=APPLICATION_ID)
 bot.remove_command('help')
+
+@tasks.loop(time=reset_time)
+async def reset_daily_msgs():
+    try:
+        for server in servers:
+            server.dailymsgs = 0
+        print(f"Reset all dailymsgs")
+    except Exception as e:
+        print(f"Failed to reset msgs")
+
+
+
+async def setup_topgg():
+    bot.topggpy = topgg.DBLClient(bot, DBL_TOKEN)
+    bot.topgg_webhook = topgg.WebhookManager(bot).dbl_webhook("/dblwebhook", "agentwebweb123123")
+    bot.topgg_webhook.run(5000)  # this method can be awaited as well
+    print("setup topgg")
+    
+    
+@bot.event
+async def on_dbl_vote(data):
+    """An event that is called whenever someone votes for the bot on Top.gg."""
+    print("someone voted")
+    print(data)
+    if data["type"] == "test":
+        # this is roughly equivalent to
+        # `return await on_dbl_test(data)` in this case
+        return bot.dispatch("dbl_test", data)
+
+    print(f"Received a vote:\n{data}")
+
+
+@bot.event
+async def on_dbl_test(data):
+    print("1")
+    """An event that is called whenever someone tests the webhook system for your bot on Top.gg."""
+    print(f"Received a test vote:\n{data}")
+
+ 
 
 @bot.command(name='sync')
 async def sync(ctx):
@@ -35,6 +80,8 @@ async def help(interaction: discord.Interaction, page: str = "") -> None:
         await interaction.response.send_message(embed=helpembeds.help_embeds[1])
     elif page.strip().lower() == "2":
         await interaction.response.send_message(embed=helpembeds.help_embeds[2])
+    elif page.strip().lower() == "3":
+        await interaction.response.send_message(embed=helpembeds.help_embeds[3])
     else:
         await interaction.response.send_message(embed=helpembeds.help_embeds[0])
 
@@ -53,12 +100,16 @@ async def shutdown(ctx):
         return
     print("shutdown")
     try:
-        for server in bot_instances:
-            for chatbot in bot_instances[server]:
-                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "context", chatbot.context)
-        await bot.close()
+        for server in servers:
+            try:
+                guild = await bot.fetch_guild(server.id)
+                def_settings = await jsonhandler.set_server(guild, server)
+            except Exception as e:
+                print(e)
+            
         raise SystemExit(0)
     except Exception as e:
+        print("shutdown error")
         print(e)
 
         
@@ -82,10 +133,16 @@ async def on_ready():
     try:
         game = discord.Game("/createchatbot")
         await bot.change_presence(status=discord.Status.online, activity=game)
+        await setup_topgg()
         await jsonhandler.checkdb(bot)
+        
+        
         print("finished checkdb")
         await jsonhandler.load_db_to_mem(bot.guilds)
         print("finished load mem")
+        # await reset_msgs()
+        reset_daily_msgs.start()
+        print("done on ready")
     except Exception as e:
         print("on ready err")
         print(e)
@@ -97,12 +154,32 @@ async def on_guild_join(guild):
 
 @bot.event
 async def on_message(message):
-    if message.author == bot.user: # don't process bot messages (may change later)
+    if message.channel.id == 1097027491375370242:
+        print("User voted")
+        fet = str(message.content)
+        try:
+            guildid = int(fet[fet.index('a') + 2:fet.index(' ')])
+            user = int(fet[fet.index("user") + 5:fet.index(" ", fet.index("user") + 5)])
+            print(guildid)
+            print(user)    
+            server = await jsonhandler.get_server(guildid)
+            guild = await bot.fetch_guild(guildid)
+            channel = await guild.fetch_channel(server.voting_channel_id)
+            server.dailymsgs = 0
+            embed=discord.Embed(title="Thank you for voting for Dis.AI!", description=f"<@{user}> has voted for Dis.AI!\nThis server's message limit has been reset to 0!```You can vote again in 12 hours!```", color=discord.Colour.blue())
+            embed.set_thumbnail(url='https://github.com/jacobjude/Dis.AI/blob/master/icon.png?raw=true')
+            await channel.send(embed=embed)
+        except Exception as e:
+            print(e)
         return
     
-    current_time = time.strftime("%H:%M:%S", time.localtime())
-    current_server = await jsonhandler.get_server(message) # get Server that the message is from
-    print(f"\n{current_time} {message.author.name}: {message.content}\n(server: '{message.guild.name}', channel: '{message.channel.name}')")
+    if message.author == bot.user: # don't process bot messages (may change later)
+        return
+    now = datetime.now()
+    formatted_date = now.strftime("%m/%d %H:%M:%S")
+
+    current_server = await jsonhandler.get_server(message.guild.id) # get Server that the message is from
+    print(f"\n{formatted_date} {message.author.name}: {message.content}\n(server: '{message.guild.name}', channel: '{message.channel.name}'), key: {bool(current_server.openai_key)}")
     # process commands only if message author is admin, owner, or if no admins are set.
     if (not current_server.adminroles or message.author.id == message.guild.owner.id or any(role in current_server.adminroles for role in message.author.roles)):
         if message.content.startswith("ai."):
@@ -119,6 +196,7 @@ async def main():
     for filename in os.listdir('./cogs'):
         if filename.endswith('.py'):
             await bot.load_extension(f'cogs.{filename[:-3]}')
+            
     await bot.start(DISCORD_TOKEN)
 
 if __name__ == "__main__":

@@ -15,7 +15,7 @@ async def get_bing_response(question, bingbot):
             
     return out
 
-async def get_response(cb, message):
+async def get_response(cb, message, apikey=OPENAI_API_KEY):
     # build the messages
     while (len(cb.context) > cb.max_message_history_length): # trim cb.context (excluding prompt) if it's >= mmhl
         del cb.context[1:3]
@@ -27,16 +27,22 @@ async def get_response(cb, message):
         else:
             cb.context.append({'role':'system', 'content': cb.prompt})
 
-    if cb.context[0]['role'] != 'system':
+    if not cb.context or cb.context[0]['role'] != 'system':
         cb.context.insert(0, {'role':'system', 'content':cb.prompt})
     
-    
-    print(f"Context below. (Len: {len(cb.context)})")
+    if not apikey:
+        apikey=OPENAI_API_KEY
+        print(f"Context Len: {len(cb.context)}")
+    else:
+        print(f"Context Len: {len(cb.context)} - (custom API key)")
     for line in cb.context:
         print(line)
+    
+    
+    
     try:
         completion = await openai_async.chat_complete(
-            OPENAI_API_KEY,
+            apikey,
             timeout=300,
             payload={
                 "model":"gpt-3.5-turbo",
@@ -49,6 +55,8 @@ async def get_response(cb, message):
                 "frequency_penalty":cb.frequency_penalty
             }
         )
+        if completion.status_code == 401:
+            return (-3, "Invalid key")
         cb.context.append({'role':'assistant', 'content':completion.json()['choices'][0]['message']['content']})
         return 0, completion.json()['choices'][0]
     except Exception as e:
@@ -76,7 +84,10 @@ async def get_moderation(question):
         "violence": "Content that promotes or glorifies violence or celebrates the suffering or humiliation of others.",
         "violence/graphic": "Violent content that depicts death, violence, or serious physical injury in extreme graphic detail.",
     }
-    response = openai.Moderation.create(input=question)
+    try:
+        response = openai.Moderation.create(input=question)
+    except Exception as e:
+        return  -1
     if response.results[0].flagged:
         # get the categories that are flagged and generate a message
         result = [
