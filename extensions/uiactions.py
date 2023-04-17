@@ -36,7 +36,7 @@ class RemovePrefixDropdown(ui.Select):
         for prefix in self.values:
             self.cb.prefixes.remove(prefix)
         
-        await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "prefixes", self.cb.prefixes)
+        # await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "prefixes", self.cb.prefixes)
         outstr = '\n'.join(self.values)
         embed = discord.Embed(title=f"Deleted prefixes", description=f"Deleted the following prefixes:\n{outstr}", colour=Colour.blue())
         await interaction.response.send_message(embed=embed)
@@ -154,7 +154,7 @@ class PromptModal(ui.Modal, title="Enter New Prompt"):
     async def on_submit(self, interaction: discord.Interaction):
         if self.cb.setPrompt(self.response.value):
             self.cb.context.clear()
-            await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "prompt", self.cb.prompt)
+            # await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "prompt", self.cb.prompt)
             embed = discord.Embed(title=f"Prompt changed for {self.cb.name}", description=self.cb.prompt, color=discord.Colour.blue())
             await interaction.response.send_message(embed=embed) 
         else:
@@ -169,12 +169,10 @@ class IMModal(ui.Modal, title="Enter Message to Insert"):
     content = ui.TextInput(label="Message", style=discord.TextStyle.long, placeholder="user: What's my name?\nsystem: User's name is bongo.\nassistant: Why, it's bongo, of course!")
     async def on_submit(self, interaction: discord.Interaction):
         lines = self.content.value.strip().split("\n")
-        print(lines)
         linesAdded = 0
         for line in lines:
             line = line.split(":", 1)
             ctxrole = line[0].strip().lower()
-            print(ctxrole)
             if ctxrole == "assistant" or ctxrole == "user" or ctxrole == "system": 
                 self.cb.context.append({'role':ctxrole, 'content': line[1].strip()})
                 linesAdded += 1
@@ -195,7 +193,7 @@ class TempModal(ui.Modal, title="Enter New Temperature"):
     response = ui.TextInput(label="", style=discord.TextStyle.short, placeholder="0.9")
     async def on_submit(self, interaction: discord.Interaction):
         if self.cb.settemp(self.response.value):
-            await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "temperature", self.cb.temperature)
+            # await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "temperature", self.cb.temperature)
             embed = discord.Embed(title=f"Temperature changed for chatbot: {self.cb.name}", description="Temperature:", color=discord.Colour.blue())
             embed.add_field(name="", value=str(self.cb.temperature))
             await interaction.response.send_message(embed=embed) 
@@ -211,7 +209,7 @@ class PPModal(ui.Modal, title="Enter New Presence Penalty"):
     response = ui.TextInput(label="", style=discord.TextStyle.short, placeholder="0.7")
     async def on_submit(self, interaction: discord.Interaction):
         if self.cb.setpp(self.response.value):
-            await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "presence_penalty", self.cb.top_p)
+            # await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "presence_penalty", self.cb.top_p)
             embed = discord.Embed(title=f"Presence Penalty changed for chatbot: {self.cb.name}", description="Changed to:", color=discord.Colour.blue())
             embed.add_field(name="", value=str(self.cb.presence_penalty))
             await interaction.response.send_message(embed=embed) 
@@ -227,7 +225,7 @@ class FPModal(ui.Modal, title="Enter New Frequency Penalty"):
     response = ui.TextInput(label="", style=discord.TextStyle.short, placeholder="0.7")
     async def on_submit(self, interaction: discord.Interaction):
         if self.cb.setfp(self.response.value):
-            await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "frequency_penalty", self.cb.frequency_penalty)
+            # await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "frequency_penalty", self.cb.frequency_penalty)
             embed = discord.Embed(title=f"Frequency Penalty changed for chatbot: {self.cb.name}", description="Changed to:", color=discord.Colour.blue())
             embed.add_field(name="", value=str(self.cb.frequency_penalty))
             await interaction.response.send_message(embed=embed) 
@@ -243,7 +241,7 @@ class APModal(ui.Modal, title="Add New Prefix"):
     prefix = ui.TextInput(label="", style=discord.TextStyle.short, placeholder="Hey chatbot, ")
     async def on_submit(self, interaction: discord.Interaction):
         if self.cb.addprefix(self.prefix.value):
-            await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "prefixes", self.cb.prefixes)
+            # await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "prefixes", self.cb.prefixes)
             embed = discord.Embed(title=f"Added prefix for chatbot: {self.cb.name}", description=f"{self.cb.name} will now only respond if a message starts with one of the following prefixes:", color=discord.Colour.blue())
             embed.add_field(name="", value=", ".join(self.cb.prefixes))
             await interaction.response.send_message(embed=embed) 
@@ -260,7 +258,7 @@ class MTKModal(ui.Modal, title="Enter New Max Token Amount"):
     response = ui.TextInput(label="", style=discord.TextStyle.short, placeholder="2048")
     async def on_submit(self, interaction: discord.Interaction):
         if self.cb.setmaxtk(self.response.value):
-            await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "max_tokens", self.cb.max_tokens)
+            # await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "max_tokens", self.cb.max_tokens)
             embed = discord.Embed(title=f"Max tokens changed for chatbot: {self.cb.name}", description="Changed to:", color=discord.Colour.blue())
             embed.add_field(name="", value=str(self.cb.max_tokens))
             await interaction.response.send_message(embed=embed) 
@@ -276,7 +274,7 @@ class MHLModal(ui.Modal, title="Enter New Max Message History Length"):
     response = ui.TextInput(label="", style=discord.TextStyle.short, placeholder="20")
     async def on_submit(self, interaction: discord.Interaction):
         if self.cb.set_mmhl(self.response.value):
-            await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "max_message_history_length", self.cb.max_message_history_length)
+            # await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "max_message_history_length", self.cb.max_message_history_length)
             embed = discord.Embed(title=f"Max Message History Length changed for chatbot: {self.cb.name}", description="Changed to:", color=discord.Colour.blue())
             embed.add_field(name="", value=str(self.cb.max_message_history_length))
             await interaction.response.send_message(embed=embed) 
@@ -292,7 +290,7 @@ class PRIModal(ui.Modal, title="Enter New Prompt Reminder Interval"):
     response = ui.TextInput(label="", style=discord.TextStyle.short, placeholder="10")
     async def on_submit(self, interaction: discord.Interaction):
         if self.cb.set_pri(self.response.value):
-            await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "prompt_reminder_interval", self.cb.prompt_reminder_interval)
+            # await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "prompt_reminder_interval", self.cb.prompt_reminder_interval)
             embed = discord.Embed(title=f"Prompt Reminder Interval changed for chatbot: {self.cb.name}", description="Changed to:", color=discord.Colour.blue())
             embed.add_field(name="", value=str(self.cb.prompt_reminder_interval))
             await interaction.response.send_message(embed=embed) 
@@ -308,7 +306,7 @@ class TopPModal(ui.Modal, title="Enter New Top P"):
     response = ui.TextInput(label="", style=discord.TextStyle.short, placeholder="1.0")
     async def on_submit(self, interaction: discord.Interaction):
         if self.cb.settopp(self.response.value):
-            await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "top_p", self.cb.top_p)
+            # await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "top_p", self.cb.top_p)
             embed = discord.Embed(title=f"Top P for chatbot: {self.cb.name}", description="Changed to:", color=discord.Colour.blue())
             embed.add_field(name="", value=str(self.cb.top_p))
             await interaction.response.send_message(embed=embed) 
@@ -324,7 +322,7 @@ class ARDropdown(ui.RoleSelect):
     
     async def callback(self, interaction: discord.Interaction):
         await self.server.set_allowed_roles([role.id for role in self.values])
-        await change_server_setting_in_db(interaction.guild.id, "allowedroles", self.server.allowedroles)
+        # await change_server_setting_in_db(interaction.guild.id, "allowedroles", self.server.allowedroles)
         out = "\n".join([role.name for role in self.values])
         embed = discord.Embed(title=f"Allowed roles", description=f"The following roles can now interact with Dis.AI chatbots:\n{out}", color=discord.Colour.blue())
         await interaction.response.send_message(embed=embed) 
@@ -345,7 +343,7 @@ class RARDropdown(ui.Select):
         for role in AllowRoles:
             if role.name in self.values:
                 self.server.allowedroles.remove(role.id)
-        await change_server_setting_in_db(interaction.guild.id, "allowedroles", self.server.allowedroles)
+        # await change_server_setting_in_db(interaction.guild.id, "allowedroles", self.server.allowedroles)
         out = "\n".join([rolename for rolename in self.values])
         embed = discord.Embed(title=f"Removed roles", description=f"The following roles can no longer interact with Dis.AI chatbots:\n{out}", color=discord.Colour.blue())
         await interaction.response.send_message(embed=embed) 
@@ -367,7 +365,7 @@ class AARDropdown(ui.RoleSelect):
     
     async def callback(self, interaction: discord.Interaction):
         await self.server.set_admin_roles([role.id for role in self.values])
-        await change_server_setting_in_db(interaction.guild.id, "adminroles", self.server.adminroles)
+        # await change_server_setting_in_db(interaction.guild.id, "adminroles", self.server.adminroles)
         out = "\n".join([role.name for role in self.values])
         embed = discord.Embed(title=f"Admin roles", description=f"The following roles can now change the settings of Dis.AI chatbots:\n{out}", color=discord.Colour.blue())
         await interaction.response.send_message(embed=embed) 
@@ -381,11 +379,10 @@ class RAARDropdown(ui.Select):
     
     async def callback(self, interaction: discord.Interaction):
         AdminRoles = [interaction.guild.get_role(roleid) for roleid in self.server.adminroles]
-        print(AdminRoles)
         for role in AdminRoles:
             if role.name in self.values:
                 self.server.adminroles.remove(role.id)
-        await change_server_setting_in_db(interaction.guild.id, "adminroles", self.server.adminroles)
+        # await change_server_setting_in_db(interaction.guild.id, "adminroles", self.server.adminroles)
         out = "\n".join([rolename for rolename in self.values])
         embed = discord.Embed(title=f"Removed roles", description=f"The following roles can no longer change the settings of Dis.AI chatbots:\n{out}", color=discord.Colour.blue())
         await interaction.response.send_message(embed=embed) 
@@ -404,7 +401,7 @@ class ASPModal(ui.Modal, title="Add New Prefix"):
     prefix = ui.TextInput(label="", style=discord.TextStyle.short, placeholder="search")
     async def on_submit(self, interaction: discord.Interaction):
         if self.cb.addsearchprefix(self.prefix.value):
-            await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "search_prefixes", self.cb.search_prefixes)
+            # await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "search_prefixes", self.cb.search_prefixes)
             embed = discord.Embed(title=f"Added search prefix for chatbot: {self.cb.name}", description=f"{self.cb.name} will now perform a search if a message starts with one of the following prefixes:", color=discord.Colour.blue())
             embed.add_field(name="", value=", ".join(self.cb.search_prefixes))
             await interaction.response.send_message(embed=embed) 
@@ -429,7 +426,7 @@ class RSPDropdown(ui.Select):
         for searchprefix in self.values:
             self.cb.search_prefixes.remove(searchprefix)
         
-        await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "search_prefixes", self.cb.search_prefixes)
+        # await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "search_prefixes", self.cb.search_prefixes)
         outstr = '\n'.join(self.values)
         embed = discord.Embed(title=f"Deleted prefixes", description=f"Deleted the following search prefixes:\n{outstr}", colour=Colour.blue())
         await interaction.response.send_message(embed=embed)
@@ -443,14 +440,14 @@ class IUMenu(discord.ui.View):
     @discord.ui.button(label="Enabled", style=discord.ButtonStyle.green)
     async def enableiu(self, interaction: discord.Interaction, button: discord.ui.Button):
         if self.cb.set_include_usernames(True):
-            await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "include_usernames", self.cb.include_usernames)
+            # await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "include_usernames", self.cb.include_usernames)
             embed = discord.Embed(title=f"Include usernames enabled for {self.cb.name}", color=discord.Colour.blue())
             await interaction.response.send_message(embed=embed)
         
     @discord.ui.button(label="Disabled", style=discord.ButtonStyle.red)
     async def disableiu(self, interaction: discord.Interaction, button: discord.ui.Button):
         if self.cb.set_include_usernames(False):
-            await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "include_usernames", self.cb.include_usernames)   
+            # await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "include_usernames", self.cb.include_usernames)   
             embed = discord.Embed(title=f"Include usernames disabled for {self.cb.name}", color=discord.Colour.blue())
             await interaction.response.send_message(embed=embed)
             

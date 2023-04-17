@@ -5,8 +5,8 @@ import asyncio
 
 
 async def process_ai_response(current_server, message):
-    if (not current_server.openai_key) and (current_server.dailymsgs > 40):
-        embed = discord.Embed(title="Excceded the free daily message limit (40 messages/day).\n(Resets 12:00 AM EST)", description="Want to send more messages? Set your OpenAI API key with `/setkey`", color=discord.Colour.red())
+    if (not current_server.openai_key) and (current_server.dailymsgs > 25):
+        embed = discord.Embed(title="Excceded the free daily message limit (25 messages/day).\n(Resets 12:00 AM EST)", description="Want to send more messages? Set your OpenAI API key with `/setkey`", color=discord.Colour.red())
         await message.channel.send(embed=embed)
         return
         

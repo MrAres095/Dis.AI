@@ -23,7 +23,7 @@ intents.members = True
 intents.guilds = True
 
 
-reset_time = time(hour=7, minute=30, tzinfo=timezone.utc)
+reset_time = time(hour=16, minute=00, tzinfo=timezone.utc)
 
 bot = commands.Bot(command_prefix='ai.', intents=intents, application_id=APPLICATION_ID)
 bot.remove_command('help')
@@ -100,32 +100,16 @@ async def shutdown(ctx):
         return
     print("shutdown")
     try:
-        for server in bot_instances:
-            await jsonhandler.change_server_setting_in_db(server.id, "adminroles", server.adminroles)
-            await jsonhandler.change_server_setting_in_db(server.id, "allowedroles", server.allowedroles)
-            await jsonhandler.change_server_setting_in_db(server.id, "dailymsgs", server.dailymsgs)
-            await jsonhandler.change_server_setting_in_db(server.id, "openai_key", server.openai_key)
-            for chatbot in bot_instances[server]:
-                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "name", chatbot.context)
-                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "prompt", chatbot.prompt)
-                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "max_tokens", chatbot.max_tokens)
-                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "temperature", chatbot.temperature)
-                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "top_p", chatbot.top_p)
-                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "n", chatbot.n)
-                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "presence_penalty", chatbot.presence_penalty)
-                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "frequency_penalty", chatbot.frequency_penalty)
-                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "enabled", chatbot.enabled)
-                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "channels", chatbot.channels)
-                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "server_id", chatbot.server_id)
-                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "max_message_history_length", chatbot.max_message_history_length)
-                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "prompt_reminder_interval", chatbot.prompt_reminder_interval)
-                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "include_usernames", chatbot.include_usernames)
-                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "prefixes", chatbot.prefixes)
-                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "search_prefixes", chatbot.search_prefixes)
-                await jsonhandler.change_cb_setting_in_db(server, chatbot.name, "context", chatbot.context)
-        await bot.close()
+        for server in servers:
+            try:
+                guild = await bot.fetch_guild(server.id)
+                def_settings = await jsonhandler.set_server(guild, server)
+            except Exception as e:
+                print(e)
+            
         raise SystemExit(0)
     except Exception as e:
+        print("shutdown error")
         print(e)
 
         

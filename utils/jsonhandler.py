@@ -77,6 +77,18 @@ async def change_cb_setting_in_db(guildid, botname, setting, newvalue):
 async def change_server_setting_in_db(guildid, setting, newvalue):
     db.servers.update_one({"_id": guildid}, {"$set": { f"settings.{setting}": newvalue } })
     
+async def set_server(guild, server):
+    def_settings = await make_settings_dict(server)
+    botlist = []
+    for chatbot in lists.bot_instances[server.id]:
+                def_bot = await make_bot_dict(chatbot)
+                botlist.append(def_bot)
+    db.servers.update_one({"_id": guild.id}, {"$set": {"_id": guild.id,
+                "server_name": guild.name,
+                "settings": def_settings,
+                "bots": botlist}})
+    
+    
 async def get_cb(ctx, name):
     # get the chatbot to edit
     cb_to_edit = None
