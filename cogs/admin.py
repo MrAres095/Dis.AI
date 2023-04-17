@@ -38,7 +38,7 @@ class AdminCommands(commands.Cog):
         print("finished")
         
     @commands.command(name='defprompts')
-    async def removectxs(self, ctx):
+    async def defprompts(self, ctx):
         print("starting")
         try:
             for guild in self.bot.guilds:
