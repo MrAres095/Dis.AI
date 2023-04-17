@@ -41,8 +41,11 @@ class AdminCommands(commands.Cog):
         
     @commands.command(name='defprompts')
     async def defprompts(self, ctx):
+<<<<<<< HEAD
         if ctx and not ctx.author.id == 215199288177721344:
             return
+=======
+>>>>>>> 0937107044ffdcbb8a0923e6d8616ff5881972f4
         print("starting")
         try:
             for guild in self.bot.guilds:
