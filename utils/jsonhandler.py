@@ -46,7 +46,7 @@ async def load_db_to_mem(guilds):
             if server['_id'] not in [server.id for server in lists.servers]:
                 lists.servers.append(Server.Server(id=server['_id'], adminroles=server['settings']['adminroles'], allowedroles=server['settings']['allowedroles'], 
                                                 dailymsgs=server['settings']['dailymsgs'],
-                                                openai_key=server['settings']['openai_key']))
+                                                openai_key=server['settings']['openai_key'], voting_channel_id=server['settings']['voting_channel_id']))
                 lists.bot_instances[server['_id']] = []
 
             for b in server['bots']:
