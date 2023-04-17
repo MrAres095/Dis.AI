@@ -78,9 +78,7 @@ __**Output Generation**__
     @app_commands.command(name="showenabledhere", description="Shows all chatbots that are enabled in the current channel")
     async def showenabledhere(self, interaction:discord.Interaction) -> None:
         try:
-            server = await get_server(interaction)
-            print(server)
-            print("above is server")
+            server = await get_server(interaction.guild.id)
             embed = discord.Embed(title="List of chatbots enabled in current channel", description="\n".join([cb.name for cb in lists.bot_instances[interaction.guild.id] if interaction.channel.id in cb.channels]), colour=Colour.blue())
             await interaction.response.send_message(embed=embed)
         except Exception as e:
@@ -118,7 +116,10 @@ __**Output Generation**__
             await interaction.response.send_message(embed=embed)
             return
         cb.channels.remove(interaction.channel.id)
-        cb.bing_bots.pop(interaction.channel.id)
+        try:
+            cb.bing_bots.pop(interaction.channel.id)
+        except Exception as e:
+            print(e)
         await change_cb_setting_in_db(interaction.guild.id, cb.name, "channels", cb.channels)
         embed = discord.Embed(title=f"{cb.name} has been removed from the current channel", colour=Colour.blue())
         await interaction.response.send_message(embed=embed)
@@ -155,21 +156,6 @@ __**Output Generation**__
                 await interaction.response.send_message(embed=embed)
                 return
         await interaction.response.send_message(view=DeleteChatView(interaction))
-
-    
-    @app_commands.command(name="removeprefix", description="Removes the selected prefixes from the specified chatbot\nSee '/help settings' for details on prefixes")
-    async def removeprefix(self, interaction: discord.Interaction, cbname: str) -> None:
-        if not lists.bot_instances[interaction.guild.id]:
-            embed = discord.Embed(title="Error", description="No chatbots currently exist\nCreate a chatbot with ```/createchatbot```", color=Colour.red())
-            await interaction.response.send_message(embed=embed)
-            return
-        cb = await get_cb(interaction, cbname)
-        if not cb or not cb.prefixes:
-            embed = discord.Embed(title="Error", description="This chatbot currently has no prefixes\nAdd prefixes using ```/settings```", color=Colour.red())
-            await interaction.response.send_message(embed=embed)
-            return
-            
-        await interaction.response.send_message(view=RemovePrefixView(interaction, cb))
         
     @app_commands.command(name="setdefault", description="Resets all settings for the specified chatbot to default")
     async def setdefault(self, interaction: discord.Interaction, chatbot_name: str) -> None:
@@ -190,7 +176,7 @@ __**Output Generation**__
     @app_commands.command(name="forcemessage", description="Forces a message from the specified chatbot.")
     async def forcemessage(self, interaction: discord.Interaction, chatbot_name: str, num_msgs: int) -> None:   
         cb = await get_cb(interaction, chatbot_name)
-        current_server = await get_server(interaction) # get Server that the message is from
+        current_server = await get_server(interaction.guild.id) # get Server that the message is from
         await messagehandler.force_ai_response(interaction, cb, num_msgs)
 
     @app_commands.command(name="insertmessage", description="Shows all chatbots that are enabled in the current channel")
@@ -202,7 +188,17 @@ __**Output Generation**__
             return
         await interaction.response.send_modal(IMModal(cb))
         
-
+    @app_commands.command(name="messagehistory", description="Shows the message history for the specified chatbot")
+    async def messagehistory(self, interaction:discord.Interaction, chatbot_name: str) -> None:
+        cb = await get_cb(interaction, chatbot_name)
+        if not cb:
+            embed = discord.Embed(title="Error", description="Please make sure you have entered the name correctly and try again.", colour=Colour.red())
+            await interaction.response.send_message(embed=embed)
+            return
+        current_server = await get_server(interaction.guild.id) # get Server that the message is from
+        embed=discord.Embed(title=f"Message history for {cb.name} below", color=discord.Colour.blue())
+        await interaction.response.send_message(embed=embed)
+        await messagehandler.send_channel_msg(interaction.channel, "\n".join(str(item) for item in cb.context))
         
 async def setup(bot):
     await bot.add_cog(ChatBotSettings(bot))

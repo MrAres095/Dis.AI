@@ -453,3 +453,23 @@ class IUMenu(discord.ui.View):
             await change_cb_setting_in_db(interaction.guild.id, self.cb.name, "include_usernames", self.cb.include_usernames)   
             embed = discord.Embed(title=f"Include usernames disabled for {self.cb.name}", color=discord.Colour.blue())
             await interaction.response.send_message(embed=embed)
+            
+class OpenAIKeyModal(ui.Modal, title="Set OpenAI API Key"):
+    def __init__(self, server):
+        super().__init__()
+        self.server = server
+        
+    response = ui.TextInput(label="API Key")
+    async def on_submit(self, interaction: discord.Interaction):
+        try:
+            complete = await self.server.set_openai_key(self.response.value)
+            if complete:
+                await change_server_setting_in_db(self.server.id, "openai_key", str(self.server.openai_key))
+                embed=discord.Embed(title="Successfully Set API key", color=Colour.blue())
+                await interaction.response.send_message(embed=embed)
+            else:
+                print("its inval")
+                embed=discord.Embed(title="Invalid key", color=Colour.red())
+                await interaction.response.send_message(embed=embed)
+        except Exception as e:
+            print(e)

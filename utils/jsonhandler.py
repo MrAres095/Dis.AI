@@ -31,13 +31,20 @@ async def add_guild_to_db(guild):
                 "bots": [def_bot]
                 })
 
+async def new_server_setting(setting, newvalue):
+    for server in db.servers.find():
+        await change_server_setting_in_db(server['_id'], setting, newvalue)
+    
+    
 async def load_db_to_mem(guilds):
     # add all ChatBots to lists.bot_instances and servers to lists.servers
     lists.servers.clear()
     lists.bot_instances.clear()
     for server in db.servers.find():
         if server['_id'] not in [server.id for server in lists.servers]:
-            lists.servers.append(Server.Server(id=server['_id'], adminroles=server['settings']['adminroles'], allowedroles=server['settings']['allowedroles']))
+            lists.servers.append(Server.Server(id=server['_id'], adminroles=server['settings']['adminroles'], allowedroles=server['settings']['allowedroles'], 
+                                               dailymsgs=server['settings']['dailymsgs'],
+                                               openai_key=server['settings']['openai_key']))
             lists.bot_instances[server['_id']] = []
 
         for b in server['bots']:
@@ -79,14 +86,13 @@ async def get_cb(ctx, name):
                 return chatbot
     return None
 
-async def get_server(ctx):
+async def get_server(guildid):
     server_to_edit = None
     for server in lists.servers:
-        if ctx.guild.id == server.id:
-            server_to_edit = server
-            break
+        if guildid == server.id:
+            return server
     
-    return server_to_edit
+    return None
 
 async def make_bot_dict(chatbot):
     # given a ChatBot, format it into a dictionary for export
@@ -113,6 +119,6 @@ async def make_bot_dict(chatbot):
         
 async def make_settings_dict(Server):   
     settings_dict = {
-        'adminroles':Server.adminroles, 'allowedroles': Server.allowedroles
+        'adminroles':Server.adminroles, 'allowedroles': Server.allowedroles, "dailymsgs": Server.dailymsgs, "openai_key":Server.openai_key
         }
     return settings_dict

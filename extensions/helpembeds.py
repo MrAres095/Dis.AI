@@ -1,7 +1,12 @@
 import discord
 
-helpEmbed1 = discord.Embed(title="Commands List (prefix: '/')", description="\nType '/help 2' for page 2\nType '/help settings' for help with /settings", colour=discord.Colour.blue())
+helpEmbed1 = discord.Embed(title="Commands List (prefix: '/')", colour=discord.Colour.blue())
 helpEmbed1.set_thumbnail(url='https://github.com/jacobjude/Dis.AI/blob/master/icon.png?raw=true')
+
+helpEmbed1.add_field(name="Use `/help settings` for help with `/settings`", inline=False, value="")
+helpEmbed1.add_field(name="Use `/help 2` for page 2", inline=False, value="")
+helpEmbed1.add_field(name="Use `/help 3` for page 3", inline=False, value="")
+
 helpEmbed1.add_field(name='```/createchatbot```', inline=False,
                         value='Creates a new chatbot with the given name.\nAll settings are initialized to default.\nUse /enablehere (chatbot name) to enable the chatbot in the current channel')
 
@@ -17,29 +22,22 @@ helpEmbed1.add_field(name="`/deletechatbot`", inline=False,
 helpEmbed1.add_field(name="```/disablehere (chatbot name)```", inline=False,
                      value="Disables the specified chatbot from the current channel.")
 
-helpEmbed1.add_field(name="```/clearmessagehistory (chatbotname) <(optional) number of messages to delete >```", inline=False,
-                value="Deletes the last given number of messages from the chatbot's memory. To clear all messages, don't enter any number.")
-
-helpEmbed1.add_field(name="```/Insert Message (chatbotname)```", inline=False,
-                value="Manually inserts the given message into the chatbot's message history. Possible role inputs:\n'user' role simulates a user message\n'assistant' role simulates a chatbot message\n'system' role simulates a system message (like prompt)")
-
 helpEmbed1.add_field(name="```/listchatbots```", inline=False,
                      value="Lists all created chatbots")
 
 helpEmbed1.add_field(name="```/showenabledhere```", inline=False,
                 value="Shows all chatbots that are enabled in the current channel.")
 
-helpEmbed1.add_field(name="```/chatbotinfo (chatbot name)```", inline=False,
-                value="Shows all settings for the specified chatbot")
-
-helpEmbed1.add_field(name="```/setdefault (chatbot name)```", inline=False,
-                value="Resets all settings for the specified chatbot to default")
-
 
 
 
 helpEmbed2 = discord.Embed(title="/settings help", description="", colour=discord.Colour.blue())
 helpEmbed2.set_thumbnail(url='https://github.com/jacobjude/Dis.AI/blob/master/icon.png?raw=true')
+
+helpEmbed2.add_field(name="Use `/help settings` for help with `/settings`", inline=False, value="")
+helpEmbed2.add_field(name="Use `/help 2` for page 2", inline=False, value="")
+helpEmbed2.add_field(name="Use `/help 3` for page 3", inline=False, value="")
+
 helpEmbed2.add_field(name="```Prompt```", inline=False,
                 value="Changes the prompt of the selected chatbot. This is the heart of Dis.AI. Great prompting yields great results.")
 
@@ -55,7 +53,7 @@ helpEmbed2.add_field(name="```Include Usernames```", inline=False,
 helpEmbed2.add_field(name="```Add prefix```", inline=False,
                      value="Adds a prefix to the specified chatbot. If a prefix is added, then the chatbot will only respond to a message if it starts with one of its prefixes. Multiple prefixes can be added. Useful if you only want the chatbot to respond on certain occassoins.")
 
-helpEmbed1.add_field(name="```Remove prefix (chatbot name)```", inline=False,
+helpEmbed2.add_field(name="```Remove prefix (chatbot name)```", inline=False,
                      value="Removes the selected prefixes from the specified chatbot")
 
 helpEmbed2.add_field(name="```Add search prefix```", inline=False,
@@ -82,18 +80,53 @@ helpEmbed2.add_field(name="```Top P```", inline=False,
 helpEmbed3 = discord.Embed(title="Commands List (page 2)", description="", colour=discord.Colour.blue())
 helpEmbed3.set_thumbnail(url='https://github.com/jacobjude/Dis.AI/blob/master/icon.png?raw=true')
 
-helpEmbed3.add_field(name="```/addadminrole```", inline=False,
+helpEmbed3.add_field(name="Use `/help settings` for help with `/settings`", inline=False, value="")
+helpEmbed3.add_field(name="Use `/help 2` for page 2", inline=False, value="")
+helpEmbed3.add_field(name="Use `/help 3` for page 3", inline=False, value="")
+
+
+helpEmbed3.add_field(name="```/clearmessagehistory (chatbotname) <(optional) number of messages to delete >```", inline=False,
+                value="Deletes the last given number of messages from the chatbot's memory. To clear all messages, don't enter any number.")
+
+helpEmbed3.add_field(name="```/Insert Message (chatbotname)```", inline=False,
+                value="Manually inserts the given message into the chatbot's message history. Possible role inputs:\n'user' role simulates a user message\n'assistant' role simulates a chatbot message\n'system' role simulates a system message (like prompt)")
+
+helpEmbed3.add_field(name="```/chatbotinfo (chatbot name)```", inline=False,
+                value="Shows all settings for the specified chatbot")
+
+helpEmbed3.add_field(name="```/setdefault (chatbot name)```", inline=False,
+                value="Resets all settings for the specified chatbot to default")
+
+helpEmbed3.add_field(name="```/messagehistory (chatbot name)```", inline=False,
+                value="Shows the message history for the given chatbot.")
+
+helpEmbed3.add_field(name="```/setkey```", inline=False,
+                value="Set your OpenAI API key")
+
+helpEmbed3.add_field(name="```/removekey```", inline=False,
+                value="Remove your OpenAI API key")
+
+
+
+
+helpEmbed4 = discord.Embed(title="Commands List (page 3)", description="", colour=discord.Colour.blue())
+helpEmbed4.set_thumbnail(url='https://github.com/jacobjude/Dis.AI/blob/master/icon.png?raw=true')
+
+helpEmbed4.add_field(name="Use `/help settings` for help with `/settings`", inline=False, value="")
+helpEmbed4.add_field(name="Use `/help 2` for page 2", inline=False, value="")
+helpEmbed4.add_field(name="Use `/help 3` for page 3", inline=False, value="")
+
+helpEmbed4.add_field(name="```/addadminrole```", inline=False,
                 value="Specify admin roles. Only admin roles can use Dis.AI commands. If no roles are added, then only the owner of the server can use commands.")
 
-helpEmbed3.add_field(name="```/removeadminrole```", inline=False,
+helpEmbed4.add_field(name="```/removeadminrole```", inline=False,
                 value="Removes admin role (see above for explanation)")
 
-helpEmbed3.add_field(name="```/addallowedrole```", inline=False,
+helpEmbed4.add_field(name="```/addallowedrole```", inline=False,
                 value="Adds allowed roles. Chatbots will only respond to a user of they have an allowed role. If no allowed roles are added, then chatbots will respond to all users by default.")
 
-helpEmbed3.add_field(name="```/removeallowedrole (chatbot name)```", inline=False,
+helpEmbed4.add_field(name="```/removeallowedrole (chatbot name)```", inline=False,
                 value="Removes allowed role. (See above for explanation)")
 
-
-help_embeds = [helpEmbed1, helpEmbed2, helpEmbed3]
+help_embeds = [helpEmbed1, helpEmbed2, helpEmbed3, helpEmbed4]
 

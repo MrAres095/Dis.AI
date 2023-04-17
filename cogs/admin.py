@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from extensions.lists import *
-from utils.jsonhandler import change_cb_setting_in_db, load_db_to_mem
+from utils.jsonhandler import *
 class AdminCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -25,6 +25,8 @@ class AdminCommands(commands.Cog):
         
     @commands.command(name='removectxs')
     async def removectxs(self, ctx):
+        if ctx and not ctx.author.id == 215199288177721344:
+            return
         print("starting")
         try:
             for guild in self.bot.guilds:
@@ -38,7 +40,9 @@ class AdminCommands(commands.Cog):
         print("finished")
         
     @commands.command(name='defprompts')
-    async def removectxs(self, ctx):
+    async def defprompts(self, ctx):
+        if ctx and not ctx.author.id == 215199288177721344:
+            return
         print("starting")
         try:
             for guild in self.bot.guilds:
@@ -51,7 +55,41 @@ class AdminCommands(commands.Cog):
             print(e)
         print("finished")
                 
+    @commands.command(name='addguildsetting')
+    async def addguildsetting(self, ctx, setting, newvalue=""):
+        if ctx and not ctx.author.id == 215199288177721344:
+            return
+        print("adding db setting")
+        setting = str(setting.strip())
+        newvalue = newvalue.strip()
+        try:
+            newvalue = int(newvalue)
+        except Exception as e:
+            print(e)
+        print(f".{setting}.{newvalue}.")
+        try:
+            await new_server_setting(setting, newvalue)
+        except Exception as e:
+            print(f"addguildsetting err: {e}")
+            
+        print("done")
         
+    @commands.command(name='stats')
+    async def stats(self, ctx):
+        if ctx and not ctx.author.id == 215199288177721344:
+            return
+        out = ""
+        for guild in self.bot.guilds:
+            server = await get_server(guild.id)
+            out += f"\n\n{guild.name} ({server.id}) dailymsgs({server.dailymsgs})\nChatbots:\\nn"
+            for chatbot in lists.bot_instances[server.id]:
+                out += f"Name: {chatbot.name}\nPrompt: {chatbot.prompt}\nContext: {chatbot.context}\n"
+                
+        print(out)
+            
+            
+            
+            
         
     
 async def setup(bot):
