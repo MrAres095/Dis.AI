@@ -1,4 +1,5 @@
 import discord
+import asyncio
 
 helpEmbed1 = discord.Embed(title="Commands List (prefix: '/')", colour=discord.Colour.blue())
 helpEmbed1.set_thumbnail(url='https://github.com/jacobjude/Dis.AI/blob/master/icon.png?raw=true')
@@ -27,6 +28,9 @@ helpEmbed1.add_field(name="```/listchatbots```", inline=False,
 
 helpEmbed1.add_field(name="```/showenabledhere```", inline=False,
                 value="Shows all chatbots that are enabled in the current channel.")
+
+helpEmbed1.add_field(name="```/vote```", inline=False,
+                value="Vote to reset your daily message limit.")
 
 
 
@@ -129,4 +133,10 @@ helpEmbed4.add_field(name="```/removeallowedrole (chatbot name)```", inline=Fals
                 value="Removes allowed role. (See above for explanation)")
 
 help_embeds = [helpEmbed1, helpEmbed2, helpEmbed3, helpEmbed4]
+
+async def get_vote_embed(guildid):
+    embed = discord.Embed(title=f"Vote for Dis.AI to send more messages!", description=f"[Click here to vote!\nVoting resets your message limit.\nIt's free, and it helps us out :)](https://top.gg/bot/1080638505023193139/vote?a={guildid})\n\n`You can vote once every 12 hours`", colour=discord.Colour.blue())
+    embed.set_footer(text="You must use this link to make your vote count towards your guild!")
+    embed.set_thumbnail(url='https://github.com/jacobjude/Dis.AI/blob/master/icon.png?raw=true')
+    return embed
 

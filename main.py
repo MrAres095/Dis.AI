@@ -154,13 +154,32 @@ async def on_guild_join(guild):
 
 @bot.event
 async def on_message(message):
+    if message.channel.id == 1097027491375370242:
+        print("User voted")
+        fet = str(message.content)
+        try:
+            guildid = int(fet[fet.index('a') + 2:fet.index(' ')])
+            user = int(fet[fet.index("user") + 5:fet.index(" ", fet.index("user") + 5)])
+            print(guildid)
+            print(user)    
+            server = await jsonhandler.get_server(guildid)
+            guild = await bot.fetch_guild(guildid)
+            channel = await guild.fetch_channel(server.voting_channel_id)
+            server.dailymsgs = 0
+            embed=discord.Embed(title="Thank you for voting for Dis.AI!", description=f"<@{user}> has voted for Dis.AI!\nThis server's message limit has been reset to 0!```You can vote again in 12 hours!```", color=discord.Colour.blue())
+            embed.set_thumbnail(url='https://github.com/jacobjude/Dis.AI/blob/master/icon.png?raw=true')
+            await channel.send(embed=embed)
+        except Exception as e:
+            print(e)
+        return
+    
     if message.author == bot.user: # don't process bot messages (may change later)
         return
     now = datetime.now()
     formatted_date = now.strftime("%m/%d %H:%M:%S")
 
     current_server = await jsonhandler.get_server(message.guild.id) # get Server that the message is from
-    print(f"\n{formatted_date} {message.author.name}: {message.content}\n(server: '{message.guild.name}', channel: '{message.channel.name}')")
+    print(f"\n{formatted_date} {message.author.name}: {message.content}\n(server: '{message.guild.name}', channel: '{message.channel.name}'), key: {bool(current_server.openai_key)}")
     # process commands only if message author is admin, owner, or if no admins are set.
     if (not current_server.adminroles or message.author.id == message.guild.owner.id or any(role in current_server.adminroles for role in message.author.roles)):
         if message.content.startswith("ai."):

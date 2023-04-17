@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
-from extensions.lists import *
-from utils.jsonhandler import *
+from extensions import lists
+from utils import jsonhandler
 class AdminCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -30,10 +30,10 @@ class AdminCommands(commands.Cog):
         print("starting")
         try:
             for guild in self.bot.guilds:
-                for cb in bot_instances[guild.id]:
-                    await change_cb_setting_in_db(guild.id, cb.name, "context", [])
+                for cb in lists.bot_instances[guild.id]:
+                    await jsonhandler.change_cb_setting_in_db(guild.id, cb.name, "context", [])
                     
-            await load_db_to_mem(self.bot.guilds)
+            await jsonhandler.load_db_to_mem(self.bot.guilds)
         except Exception as e:
             print("removectx err")
             print(e)
@@ -47,10 +47,10 @@ class AdminCommands(commands.Cog):
         print("starting")
         try:
             for guild in self.bot.guilds:
-                for cb in bot_instances[guild.id]:
-                    await change_cb_setting_in_db(guild.id, cb.name, "prompt", "Act as a snarky, sarcastic, arrogant, witty AI assistant named Jarvis. Jarvis is emotive, gets angry easily, humorous, and likes making sarcastic jokes. He treats everything like a joke. He is very ironic in his responses. Only respond how Jarvis would.")
+                for cb in lists.bot_instances[guild.id]:
+                    await jsonhandler.change_cb_setting_in_db(guild.id, cb.name, "prompt", "Act as a snarky, sarcastic, arrogant, witty AI assistant named Jarvis. Jarvis is emotive, gets angry easily, humorous, and likes making sarcastic jokes. He treats everything like a joke. He is very ironic in his responses. Only respond how Jarvis would.")
                     
-            await load_db_to_mem(self.bot.guilds)
+            await jsonhandler.load_db_to_mem(self.bot.guilds)
         except Exception as e:
             print("defprompt err")
             print(e)
@@ -69,7 +69,7 @@ class AdminCommands(commands.Cog):
             print(e)
         print(f".{setting}.{newvalue}.")
         try:
-            await new_server_setting(setting, newvalue)
+            await jsonhandler.new_server_setting(setting, newvalue)
         except Exception as e:
             print(f"addguildsetting err: {e}")
             
@@ -81,13 +81,18 @@ class AdminCommands(commands.Cog):
             return
         out = ""
         for guild in self.bot.guilds:
-            server = await get_server(guild.id)
+            server = await jsonhandler.get_server(guild.id)
             out += f"\n\n{guild.name} ({server.id}) dailymsgs({server.dailymsgs})\nChatbots:\\nn"
             for chatbot in lists.bot_instances[server.id]:
                 out += f"Name: {chatbot.name}\nPrompt: {chatbot.prompt}\nContext: {chatbot.context}\n"
                 
         print(out)
-            
+        
+    @commands.command(name='purgedb')
+    async def purgedb(self, ctx):
+        if ctx and not ctx.author.id == 215199288177721344:
+            return
+        await jsonhandler.purgedb(self.bot)
             
             
             

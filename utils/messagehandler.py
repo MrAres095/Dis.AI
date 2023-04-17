@@ -1,18 +1,22 @@
 import discord
 from utils import responses
 import extensions.lists as lists
+from extensions.helpembeds import get_vote_embed
 import asyncio
 
 
-async def process_ai_response(current_server, message):
-    if (not current_server.openai_key) and (current_server.dailymsgs > 25):
-        embed = discord.Embed(title="Excceded the free daily message limit (25 messages/day).\n(Resets 12:00 AM EST)", description="Want to send more messages? Set your OpenAI API key with `/setkey`", color=discord.Colour.red())
-        await message.channel.send(embed=embed)
-        return
-        
+async def process_ai_response(current_server, message):        
     for cb in lists.bot_instances[message.guild.id]:   # for each chatbot in the server
         if (cb.enabled and message.channel.id in cb.channels): # if the given ChatBot is enabled and can talk in the channel
-            
+            if (not current_server.openai_key) and (current_server.dailymsgs >= 15):
+                embed = await get_vote_embed(current_server.id)
+                await message.channel.send(embed=embed)
+                embed = discord.Embed(title="You have reached the free daily message limit (15 messages/day).\n(Resets 12:00 AM EST)", description="Want to send more messages?\nVote for us on Top.GG to reset your daily message limit to 0! (Click the link above or use `/vote`!)", color=discord.Colour.red())
+                embed.set_footer(text="(Alternatively, set your OpenAI API key with `/setkey` for unlimited messages")
+                await message.channel.send(embed=embed)
+                current_server.voting_channel_id = message.channel.id
+                print("Max daily messages reached. Sent vote and aborted")
+                return
             if cb.include_usernames: # get username / nick if nicked
                 if message.author.nick:
                     cb.context.append({'role':'user', 'content': f"{message.author.nick}: {str(message.content)}"})
