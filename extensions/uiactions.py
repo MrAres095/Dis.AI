@@ -55,7 +55,14 @@ class CreateCBView(ui.Modal, title="Enter New Chatbot Name"):
                 embed = discord.Embed(title=f"New Chat Error", description=f"A chatbot with this name already exists. Please pick a different name.\nUse /listchatbots to show all created chatbots.", colour=Colour.red())
                 await interaction.response.send_message(embed=embed)
                 return
-        newbot = ChatBot.ChatBot(name=self.name.value.strip(), server_id=interaction.guild.id, channels = [])
+        newbot = ChatBot.ChatBot()
+        newbot.name = self.name.value.strip()
+        newbot.server_id=interaction.guild.id
+        newbot.context.clear()
+        newbot.prefixes.clear()
+        newbot.search_prefixes=["search"]
+        newbot.channels.clear()
+        print(f"{newbot.name} {newbot.server_id} {newbot.channels} {newbot.prompt} {newbot.context}")
         await add_cb_to_db(interaction.guild.id, await make_bot_dict(newbot))
         lists.bot_instances[interaction.guild.id].append(newbot)
         embed = discord.Embed(title=f"New chatbot created: {self.name}", description=f"```/enablehere {self.name}``` to enable the chatbot in the current channel\n```/settings``` to change settings (prompt, temperature, etc.)\n```/help``` for more commands", colour=Colour.blue())
