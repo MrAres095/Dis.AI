@@ -141,15 +141,12 @@ async def purgedb(bot):
     print(f"purging. servers: {len(lists.servers)}, chatbots: {len(lists.bot_instances)}")
     ids = [guild.id for guild in bot.guilds]
     try:
-        for server in db.servers.find():
-            if server['_id'] not in ids:
-                del lists.bot_instances[server['_id']]
-                for guild in lists.servers:
-                    if guild.id == server['_id']:
-                        lists.servers.remove(guild)
-                        
-                        break
-        print(f"done. servers: {len(lists.servers)}, chatbots: {len(lists.bot_instances)}")
+        count = 0
+        for server in lists.servers:
+            if server.id not in ids:
+                count += 1
+        
+        print(f"{count} servers in memory that have left.")
     except Exception as e:
         print(e)
     

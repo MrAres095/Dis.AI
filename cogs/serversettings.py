@@ -68,7 +68,7 @@ class ServerSettings(commands.Cog):
     async def messagecount(self, interaction: discord.Interaction) -> None:
         try:
             server = await get_server(interaction.guild.id)
-            embed=discord.Embed(title=f"Message Count for {interaction.guild.name}", description=f"`{server.dailymsgs} / 15`\n\nWant to reset your message count to 0? Use `/vote`!", color=Colour.blue())
+            embed=discord.Embed(title=f"Message Count for {interaction.guild.name}", description=f"`{server.dailymsgs} / 25`\n\nWant to reset your message count to 0? Use `/vote`!", color=Colour.blue())
             await interaction.response.send_message(embed=embed)      
         except Exception as e:
             print(e)

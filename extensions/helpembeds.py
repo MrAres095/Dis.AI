@@ -135,7 +135,7 @@ helpEmbed4.add_field(name="```/removeallowedrole (chatbot name)```", inline=Fals
 help_embeds = [helpEmbed1, helpEmbed2, helpEmbed3, helpEmbed4]
 
 async def get_vote_embed(guildid):
-    embed = discord.Embed(title=f"Vote for Dis.AI to send more messages!", description=f"[Click here to vote!\nVoting resets your message limit.\nIt's free, and it helps us out :)](https://top.gg/bot/1080638505023193139/vote?a={guildid})\n\n`You can vote once every 12 hours`", colour=discord.Colour.blue())
+    embed = discord.Embed(title=f"Vote for Dis.AI to send more messages!", description=f"[Click here to vote!\nVoting resets your message limit.\nIt's free, and it helps us out :)](https://top.gg/bot/1080638505023193139/vote?a={guildid})\n\n`Vote again in 12 hours! (until then, have other members vote if you want to reset again)`", colour=discord.Colour.blue())
     embed.set_footer(text="You must use this link to make your vote count towards your guild!")
     embed.set_thumbnail(url='https://github.com/jacobjude/Dis.AI/blob/master/icon.png?raw=true')
     return embed
