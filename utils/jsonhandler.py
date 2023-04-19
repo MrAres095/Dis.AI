@@ -19,7 +19,6 @@ async def add_guild_to_db(guild):
     newserver = None
     if not [gid for gid in db.servers.find({"_id": guild.id})]:
             newbot = ChatBot.ChatBot(name="Default")
-            newbot.name = self.name.value.strip()
             newbot.server_id=guild.id
             newbot.context.clear()
             newbot.prefixes.clear()
