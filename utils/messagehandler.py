@@ -8,11 +8,11 @@ import asyncio
 async def process_ai_response(current_server, message):        
     for cb in lists.bot_instances[message.guild.id]:   # for each chatbot in the server
         if (cb.enabled and message.channel.id in cb.channels): # if the given ChatBot is enabled and can talk in the channel
-            if (not current_server.openai_key) and (current_server.dailymsgs >= 25):
+            if (not current_server.openai_key) and (current_server.dailymsgs >= 15):
                 embed = await get_vote_embed(current_server.id)
                 await message.channel.send(embed=embed)
-                embed = discord.Embed(title="You have reached the free daily message limit (25 messages/day).\n(Resets 12:00 AM EST)", description="Want to send more messages?\nVote for us on Top.GG to reset your daily message limit to 0! (Click the link above or use `/vote`!)", color=discord.Colour.red())
-                embed.set_footer(text="(Alternatively, set your OpenAI API key with `/setkey` for unlimited messages")
+                embed = discord.Embed(title="You have reached the free daily message limit (15 messages/day).\n(Resets 12:00 AM EST)", description="Want to send more messages?\nVote for us on Top.GG to reset your daily message limit to 0! (Click the link above or use `/vote`!)", color=discord.Colour.red())
+                embed.set_footer(text="(Or, set your OpenAI API key with `/setkey` for unlimited messages")
                 await message.channel.send(embed=embed)
                 current_server.voting_channel_id = message.channel.id
                 print("Max daily messages reached. Sent vote and aborted")
