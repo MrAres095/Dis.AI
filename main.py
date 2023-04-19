@@ -28,6 +28,16 @@ reset_time = time(hour=16, minute=00, tzinfo=timezone.utc)
 bot = commands.Bot(command_prefix='ai.', intents=intents, application_id=APPLICATION_ID)
 bot.remove_command('help')
 
+@tasks.loop(minutes=30)
+async def update_stats():
+    """This function runs every 30 minutes to automatically update your server count."""
+    try:
+        await bot.topggpy.post_guild_count()
+        print(f"Posted server count ({bot.topggpy.guild_count})")
+    except Exception as e:
+        print(f"Failed to post server count\n{e.__class__.__name__}: {e}")
+
+
 @tasks.loop(time=reset_time)
 async def reset_daily_msgs():
     try:
@@ -142,6 +152,7 @@ async def on_ready():
         print("finished load mem")
         # await reset_msgs()
         reset_daily_msgs.start()
+        update_stats.start()
         print("done on ready")
     except Exception as e:
         print("on ready err")
