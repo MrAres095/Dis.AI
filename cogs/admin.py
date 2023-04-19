@@ -109,7 +109,7 @@ class AdminCommands(commands.Cog):
         for guild in self.bot.guilds:
             for bot in lists.bot_instances[guild.id]:
                 if bot.name == botname:
-                    jsonhandler.change_cb_setting_in_db(guild.id, botname, setting, value)
+                    await jsonhandler.change_cb_setting_in_db(guild.id, botname, setting, value)
                     
         print("done. restart.")
             
