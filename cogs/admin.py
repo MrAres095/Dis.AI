@@ -101,6 +101,10 @@ class AdminCommands(commands.Cog):
             value = int(value)
         except Exception as e:
             print(e)
+            
+        if value == "emptylist":
+            value = []
+            value.clear()
         
         for guild in self.bot.guilds:
             for bot in lists.bot_instances[guild.id]:
