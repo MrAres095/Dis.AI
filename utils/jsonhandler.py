@@ -20,13 +20,13 @@ async def add_guild_to_db(guild):
     if not [gid for gid in db.servers.find({"_id": guild.id})]:
             newbot = ChatBot.ChatBot(name="Default")
             newbot.server_id=guild.id
-            newbot.context.clear()
-            newbot.prefixes.clear()
+            newbot.context = []
+            newbot.prefixes = []
             newbot.search_prefixes=["search"]
-            newbot.channels.clear()
+            newbot.channels = []
             newserver = Server.Server(id=guild.id)
-            newserver.adminroles.clear()
-            newserver.allowedroles.clear()
+            newserver.adminroles = []
+            newserver.allowedroles = []
             lists.servers.append(newserver)
             lists.bot_instances[guild.id] = [newbot]
             def_bot = await make_bot_dict(newbot)

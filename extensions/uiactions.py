@@ -58,10 +58,10 @@ class CreateCBView(ui.Modal, title="Enter New Chatbot Name"):
         newbot = ChatBot.ChatBot()
         newbot.name = self.name.value.strip()
         newbot.server_id=interaction.guild.id
-        newbot.context.clear()
-        newbot.prefixes.clear()
+        newbot.context = []
+        newbot.prefixes = []
         newbot.search_prefixes=["search"]
-        newbot.channels.clear()
+        newbot.channels = []
         print(f"{newbot.name} {newbot.server_id} {newbot.channels} {newbot.prompt} {newbot.context}")
         await add_cb_to_db(interaction.guild.id, await make_bot_dict(newbot))
         lists.bot_instances[interaction.guild.id].append(newbot)
