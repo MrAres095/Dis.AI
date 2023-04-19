@@ -93,6 +93,21 @@ class AdminCommands(commands.Cog):
         if ctx and not ctx.author.id == 215199288177721344:
             return
         await jsonhandler.purgedb(self.bot)
+        
+    @commands.command(name='setbotsetting')
+    async def setbotsetting(self, ctx, botname, setting, value):
+        print("starting")
+        try:
+            value = int(value)
+        except Exception as e:
+            print(e)
+        
+        for guild in self.bot.guilds:
+            for bot in lists.bot_instances[guild.id]:
+                if bot.name == botname:
+                    jsonhandler.change_cb_setting_in_db(guild.id, botname, setting, value)
+                    
+        print("done. restart.")
             
             
             
