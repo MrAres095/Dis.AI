@@ -1,7 +1,7 @@
 import discord
 from utils import responses
 import extensions.lists as lists
-from extensions.helpembeds import get_vote_embed
+from extensions.helpembeds import get_vote_embed, discordEmbed
 import asyncio
 
 
@@ -15,6 +15,8 @@ async def process_ai_response(current_server, message):
                 embed.set_footer(text="(Or, set your OpenAI API key with `/setkey` for unlimited messages")
                 await message.channel.send(embed=embed)
                 current_server.voting_channel_id = message.channel.id
+                await message.channel.send(embed=discordEmbed)
+                await message.channel.send("https://discord.gg/xsXD7AafX5")
                 print("Max daily messages reached. Sent vote and aborted")
                 return
             if cb.include_usernames: # get username / nick if nicked

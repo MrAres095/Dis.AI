@@ -8,7 +8,7 @@ from datetime import datetime, time, timezone
 from EdgeGPT import Chatbot
 import utils.responses as responses
 from config import DISCORD_TOKEN, APPLICATION_ID, DBL_TOKEN
-import extensions.helpembeds as helpembeds
+from extensions.helpembeds import help_embeds, discordEmbed
 from extensions.lists import bot_instances, servers
 from utils import jsonhandler, messagehandler
 import pytz
@@ -30,7 +30,6 @@ bot.remove_command('help')
 
 @tasks.loop(minutes=30)
 async def update_stats():
-    """This function runs every 30 minutes to automatically update your server count."""
     try:
         await bot.topggpy.post_guild_count()
         print(f"Posted server count ({bot.topggpy.guild_count})")
@@ -86,14 +85,24 @@ async def sync(ctx):
 
 @bot.tree.command(name="help", description="Shows command list. Start here!") # ai.help command
 async def help(interaction: discord.Interaction, page: str = "") -> None:
+    channel=interaction.channel
     if page.strip().lower() == "settings":
-        await interaction.response.send_message(embed=helpembeds.help_embeds[1])
+        await interaction.response.send_message(embed=help_embeds[1])
+        await channel.send(embed=discordEmbed)
+        await channel.send("https://discord.gg/xsXD7AafX5")
     elif page.strip().lower() == "2":
-        await interaction.response.send_message(embed=helpembeds.help_embeds[2])
+        await interaction.response.send_message(embed=help_embeds[2])
+        await channel.send(embed=discordEmbed)
+        await channel.send("https://discord.gg/xsXD7AafX5")
     elif page.strip().lower() == "3":
-        await interaction.response.send_message(embed=helpembeds.help_embeds[3])
+        await interaction.response.send_message(embed=help_embeds[3])
+        await channel.send(embed=discordEmbed)
+        await channel.send("https://discord.gg/xsXD7AafX5")
     else:
-        await interaction.response.send_message(embed=helpembeds.help_embeds[0])
+        await interaction.response.send_message(embed=help_embeds[0])
+        await channel.send(embed=discordEmbed)
+        await channel.send("https://discord.gg/xsXD7AafX5")
+        
 
 @bot.command(name='initdb')
 async def initdb(ctx):
@@ -165,14 +174,19 @@ async def on_guild_join(guild):
 
 @bot.event
 async def on_message(message):
+    
+    
+    
+    if message.author == bot.user: # don't process bot messages (may change later)
+        return
+    
+    
     if message.channel.id == 1097027491375370242:
         print("User voted")
         fet = str(message.content)
         try:
             guildid = int(fet[fet.index('a') + 2:fet.index(' ')])
             user = int(fet[fet.index("user") + 5:fet.index(" ", fet.index("user") + 5)])
-            print(guildid)
-            print(user)    
             server = await jsonhandler.get_server(guildid)
             guild = await bot.fetch_guild(guildid)
             channel = await guild.fetch_channel(server.voting_channel_id)
@@ -180,14 +194,29 @@ async def on_message(message):
             embed=discord.Embed(title="Thank you for voting for Dis.AI!", description=f"<@{user}> has voted for Dis.AI!\nThis server's message limit has been reset to 0!```You can vote again in 12 hours!```", color=discord.Colour.blue())
             embed.set_thumbnail(url='https://github.com/jacobjude/Dis.AI/blob/master/icon.png?raw=true')
             await channel.send(embed=embed)
+            print("Successfully reset dailymsgs")
         except Exception as e:
             print(e)
         return
-    
-    if message.author == bot.user: # don't process bot messages (may change later)
-        return
+    elif message.channel.id == 1098342622373883924:
+        print("User posted in daily limit channel")
+        try:
+            guildid = int(message.content)
+            server = await jsonhandler.get_server(guildid)
+            
+        except Exception as e:
+            print(e)
+            await message.channel.send(f"<@{message.author.id}> Invalid server id. See pins for information on how to get your server id.\nBe sure to paste ONLY the server id. ")
+            return
+            
+        server.dailymsgs = 0
+        await message.channel.send(f"<@{message.author.id}> Successfully reset the message count for your server to zero! Enjoy!")
+            
+        
     now = datetime.now()
     formatted_date = now.strftime("%m/%d %H:%M:%S")
+    
+    
 
     current_server = await jsonhandler.get_server(message.guild.id) # get Server that the message is from
     print(f"\n{formatted_date} {message.author.name}: {message.content}\n(server: '{message.guild.name}', channel: '{message.channel.name}'), key: {bool(current_server.openai_key)}")
