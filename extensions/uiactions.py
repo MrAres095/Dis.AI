@@ -6,6 +6,7 @@ from discord import ui
 import extensions.lists as lists
 import core.ChatBot as ChatBot
 from utils.jsonhandler import *
+from extensions.helpembeds import discordEmbed
 
 class DeleteChatDropdown(ui.Select):
     def __init__(self, interaction):
@@ -62,11 +63,13 @@ class CreateCBView(ui.Modal, title="Enter New Chatbot Name"):
         newbot.prefixes = []
         newbot.search_prefixes=["search"]
         newbot.channels = []
-        print(f"{newbot.name} {newbot.server_id} {newbot.channels} {newbot.prompt} {newbot.context}")
+        print("created new bot")
         await add_cb_to_db(interaction.guild.id, await make_bot_dict(newbot))
         lists.bot_instances[interaction.guild.id].append(newbot)
         embed = discord.Embed(title=f"New chatbot created: {self.name}", description=f"```/enablehere {self.name}``` to enable the chatbot in the current channel\n```/settings``` to change settings (prompt, temperature, etc.)\n```/help``` for more commands", colour=Colour.blue())
         await interaction.response.send_message(embed=embed)
+        await interaction.channel.send(embed=discordEmbed)
+        await interaction.channel.send("https://discord.gg/xsXD7AafX5")
 
 class ChatbotDropdown(ui.Select):
     def __init__(self, interaction):
