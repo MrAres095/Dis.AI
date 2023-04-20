@@ -37,6 +37,7 @@ async def process_ai_response(current_server, message):
                         print(f"{cb.name} - guild: {message.guild.name}")
                         if message.content: # moderate user message
                             errors = await responses.get_moderation(message.content) 
+                            errors = False # temporary
                             if errors == -1:
                                 del cb.context[-1]
                                 embed = discord.Embed(title="Check your OpenAI API Key", description="Reset your key with ```/setkey```\nIf the problem persists, please check your plan and billing details. Make sure it is set up correctly and that you have not exceeded your quota.\nhttps://platform.openai.com/account/billing", color = discord.Colour.red())
