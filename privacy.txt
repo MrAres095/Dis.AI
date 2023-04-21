@@ -1,0 +1,38 @@
+PRIVACY POLICY
+
+This privacy policy explains how our Discord bot ("Dis.AI") collects, uses, and shares information about you ("the user"). By using the bot, you consent to the terms of this privacy policy.
+
+COLLECTION OF INFORMATION
+We may collect the following information about you when you use the bot:
+
+Discord username and ID
+Server and channel information
+Messages and commands sent through channels the bot has access to 
+OpenAI API Key
+USE OF INFORMATION
+We use the information collected through the bot to:
+
+Provide and improve the bot's services
+Respond to user inquiries and support requests
+Enforce the bot's terms of use
+Comply with legal obligations
+DISCLOSURE OF INFORMATION
+We may share your information in the following circumstances:
+
+With third-party service providers who help us operate and maintain the bot
+When we believe in good faith that disclosure is necessary to protect our rights, protect your safety or the safety of others, investigate fraud, or respond to a government request
+In connection with a merger, sale, or other transaction involving the bot
+SECURITY
+We take reasonable measures to protect the information we collect through the bot from unauthorized access, disclosure, alteration, or destruction. However, no method of transmission over the internet or electronic storage is 100% secure.
+
+DATA RETENTION
+We retain the information collected through the bot for as long as necessary to provide the bot's services and for other legitimate business purposes, such as complying with legal obligations, resolving disputes, and enforcing our agreements.
+
+CHILDREN'S PRIVACY
+The bot is not intended for use by children under the age of 13. We do not knowingly collect personal information from children under the age of 13.
+
+CHANGES TO THIS PRIVACY POLICY
+We may update this privacy policy from time to time. We will notify you of any changes by posting the new privacy policy on this page.
+
+CONTACT US
+If you have any questions about this privacy policy, please contact me at botboard#7385.
