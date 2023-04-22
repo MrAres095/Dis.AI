@@ -7,3 +7,4 @@ pymongo
 EdgeGPT
 pytz
 topggpy
+cryptography

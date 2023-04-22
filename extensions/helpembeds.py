@@ -88,24 +88,23 @@ helpEmbed3.add_field(name="Use `/help settings` for help with `/settings`", inli
 helpEmbed3.add_field(name="Use `/help 2` for page 2", inline=False, value="")
 helpEmbed3.add_field(name="Use `/help 3` for page 3", inline=False, value="")
 
-
-helpEmbed3.add_field(name="```/clearmessagehistory (chatbotname) <(optional) number of messages to delete >```", inline=False,
-                value="Deletes the last given number of messages from the chatbot's memory. To clear all messages, don't enter any number.")
-
-helpEmbed3.add_field(name="```/Insert Message (chatbotname)```", inline=False,
-                value="Manually inserts the given message into the chatbot's message history. Possible role inputs:\n'user' role simulates a user message\n'assistant' role simulates a chatbot message\n'system' role simulates a system message (like prompt)")
-
 helpEmbed3.add_field(name="```/chatbotinfo (chatbot name)```", inline=False,
                 value="Shows all settings for the specified chatbot")
 
 helpEmbed3.add_field(name="```/setdefault (chatbot name)```", inline=False,
                 value="Resets all settings for the specified chatbot to default")
 
+helpEmbed3.add_field(name="```/clearmessagehistory (chatbotname) <(optional) number of messages to delete>```", inline=False,
+                value="Deletes the last given number of messages from the chatbot's memory. To clear all messages, don't enter any number.")
+
+helpEmbed3.add_field(name="```/insertMessage (chatbotname)```", inline=False,
+                value="Manually inserts the given message into the chatbot's message history. Possible role inputs:\n'user' role simulates a user message\n'assistant' role simulates a chatbot message\n'system' role simulates a system message (like prompt)")
+
 helpEmbed3.add_field(name="```/messagehistory (chatbot name)```", inline=False,
                 value="Shows the message history for the given chatbot.")
 
 helpEmbed3.add_field(name="```/setkey```", inline=False,
-                value="Set your OpenAI API key")
+                value="Set your OpenAI API key\nAdding a key removes all message restrictions!")
 
 helpEmbed3.add_field(name="```/removekey```", inline=False,
                 value="Remove your OpenAI API key")

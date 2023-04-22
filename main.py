@@ -14,6 +14,7 @@ from utils import jsonhandler, messagehandler
 import pytz
 import topgg
 from discord.ext import tasks
+from encryption import encrypt
 eastern = pytz.timezone('US/Eastern')
 
 # intents
@@ -31,8 +32,11 @@ bot.remove_command('help')
 @tasks.loop(minutes=30)
 async def update_stats():
     try:
-        await bot.topggpy.post_guild_count()
-        print(f"Posted server count ({bot.topggpy.guild_count})")
+        if bot.user.id != 1087577022693384263:
+            await bot.topggpy.post_guild_count()
+            print(f"Posted server count ({bot.topggpy.guild_count})")
+        else:
+            print("In test, not posting")
     except Exception as e:
         print(f"Failed to post server count\n{e.__class__.__name__}: {e}")
 
@@ -118,6 +122,7 @@ async def shutdown(ctx):
     if ctx and not ctx.author.id == 215199288177721344:
         return
     print("shutdown")
+    key = encrypt.generate_key()
     try:
         for server in servers:
             try:
@@ -153,13 +158,13 @@ async def on_ready():
         game = discord.Game("/createchatbot")
         await bot.change_presence(status=discord.Status.online, activity=game)
         await setup_topgg()
+        print(encrypt.get_key())
         await jsonhandler.checkdb(bot)
         
         
         print("finished checkdb")
         await jsonhandler.load_db_to_mem(bot.guilds)
         print("finished load mem")
-        # await reset_msgs()
         reset_daily_msgs.start()
         update_stats.start()
         print("done on ready")
@@ -176,11 +181,8 @@ async def on_guild_join(guild):
 async def on_message(message):
     
     
-    
     if message.author == bot.user: # don't process bot messages (may change later)
         return
-    
-    
     if message.channel.id == 1097027491375370242:
         print("User voted")
         fet = str(message.content)
@@ -210,7 +212,7 @@ async def on_message(message):
             return
             
         server.dailymsgs = 0
-        await message.channel.send(f"<@{message.author.id}> Successfully reset the message count for your server to zero! Enjoy!")
+        await message.channel.send(f"<@{message.author.id}> Successfully reset the message count for your server to zero.")
             
         
     now = datetime.now()
@@ -219,7 +221,7 @@ async def on_message(message):
     
 
     current_server = await jsonhandler.get_server(message.guild.id) # get Server that the message is from
-    print(f"\n{formatted_date} {message.author.name}: {message.content}\n(server: '{message.guild.name}', channel: '{message.channel.name}'), key: {bool(current_server.openai_key)}")
+    print(f"\n{formatted_date} {message.author.name} \n(server: '{message.guild.name}', channel: '{message.channel.name}'), key: {bool(current_server.openai_key)}")
     # process commands only if message author is admin, owner, or if no admins are set.
     if (not current_server.adminroles or message.author.id == message.guild.owner.id or any(role in current_server.adminroles for role in message.author.roles)):
         if message.content.startswith("ai."):

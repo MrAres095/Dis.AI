@@ -469,9 +469,10 @@ class OpenAIKeyModal(ui.Modal, title="Set OpenAI API Key"):
     response = ui.TextInput(label="API Key")
     async def on_submit(self, interaction: discord.Interaction):
         try:
+            print("Setting key for user")
             complete = await self.server.set_openai_key(self.response.value)
+            print("done, returned")
             if complete:
-                await change_server_setting_in_db(self.server.id, "openai_key", str(self.server.openai_key))
                 embed=discord.Embed(title="Successfully Set API key", color=Colour.blue())
                 await interaction.response.send_message(embed=embed)
             else:

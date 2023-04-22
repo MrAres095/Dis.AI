@@ -39,6 +39,7 @@ async def process_ai_response(current_server, message):
                             errors = await responses.get_moderation(message.content) 
                             errors = False # temporary
                             if errors == -1:
+                                print("OpenAPI key error")
                                 del cb.context[-1]
                                 embed = discord.Embed(title="Check your OpenAI API Key", description="Reset your key with ```/setkey```\nIf the problem persists, please check your plan and billing details. Make sure it is set up correctly and that you have not exceeded your quota.\nhttps://platform.openai.com/account/billing", color = discord.Colour.red())
                                 await message.channel.send(embed=embed)
@@ -53,8 +54,9 @@ async def process_ai_response(current_server, message):
                             print("getting bing response")
                             bing_response = await responses.get_bing_response(message.content.replace(search_prefix, "", 1).lstrip(), cb.bing_bots[message.channel.id])
                             cb.context.append({'role': 'system', 'content': f"A web search yielded the following result. With this new information, answer the user's question according to your previous conversation messages and instructions.\n\"{bing_response}\""})
-                        
+
                         response = await responses.get_response(cb, message, current_server.openai_key) # get response from openai
+                        print("got response")
                         current_server.dailymsgs += 1
                         if response[0] == -1:
                             embed = discord.Embed(title="Message failed OpenAI moderation check. Please comply with OpenAI usage policies.", color = discord.Colour.red())

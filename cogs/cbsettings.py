@@ -198,7 +198,11 @@ __**Output Generation**__
         current_server = await get_server(interaction.guild.id) # get Server that the message is from
         embed=discord.Embed(title=f"Message history for {cb.name} below", color=discord.Colour.blue())
         await interaction.response.send_message(embed=embed)
-        await messagehandler.send_channel_msg(interaction.channel, "\n".join(str(item) for item in cb.context))
+        out = ""
+        for dict in cb.context:
+            out += f"{dict['role']}: {dict['content']}\n"
+            
+        await messagehandler.send_channel_msg(interaction.channel, out)
         
 async def setup(bot):
     await bot.add_cog(ChatBotSettings(bot))

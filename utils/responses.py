@@ -38,8 +38,6 @@ async def get_response(cb, message, apikey=OPENAI_API_KEY):
     for line in cb.context:
         print(line)
     
-    
-    
     try:
         completion = await openai_async.chat_complete(
             apikey,
