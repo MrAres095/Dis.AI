@@ -61,7 +61,7 @@ async def load_db_to_mem(guilds):
                         lists.servers.append(Server.Server(id=server['_id'], adminroles=server['settings']['adminroles'], allowedroles=server['settings']['allowedroles'], 
                                                         dailymsgs=server['settings']['dailymsgs'],
                                                         openai_key=encrypt.decrypt_string(server['settings']['openai_key']), voting_channel_id=server['settings']['voting_channel_id'],
-                                                        last_interaction_date=datetime.strptime(server['settings']['last_interaction_date'], date_format), num_resets=0))
+                                                        num_resets=0))
                     except Exception as e:
                         print("dec err")
                         print(e)
@@ -73,7 +73,6 @@ async def load_db_to_mem(guilds):
                 for b in server['bots']:
                     if b['name'] not in [bot.name for bot in lists.bot_instances[server['_id']]]:
                         nb = ChatBot.ChatBot(name=b['name'], prompt=b['prompt'], max_tokens=b['max_tokens'],
-                                                    model=b['model'],
                                                     temperature=b['temperature'], top_p=b['top_p'], n=b['n'],
                                                     presence_penalty=b['presence_penalty'],
                                                     frequency_penalty=b['frequency_penalty'], enabled=b['enabled'],
