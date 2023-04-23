@@ -180,10 +180,7 @@ async def on_guild_join(guild):
 
 @bot.event
 async def on_message(message):
-    if message.content.startswith("ai."):
-        print("processing ai. command")
-        await bot.process_commands(message)
-        return
+    
     
     if message.author == bot.user: # don't process bot messages (may change later)
         return
