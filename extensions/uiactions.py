@@ -86,7 +86,7 @@ class SettingsListDropdown(ui.Select):
     def __init__(self, cb):
         self.cb = cb
         options =[discord.SelectOption(label="Prompt"),
-                  discord.SelectOption(label="Model")
+                  discord.SelectOption(label="Model"),
                   discord.SelectOption(label="Insert Message"),
                   discord.SelectOption(label="Message History Length"),
                   discord.SelectOption(label="Prompt Reminder Interval"),
@@ -100,7 +100,7 @@ class SettingsListDropdown(ui.Select):
                   discord.SelectOption(label="Frequency Penalty"),
                   discord.SelectOption(label="Max Tokens"),
                   discord.SelectOption(label="Top P"),
-                  discord.SelectOption(label="Long Prompt"),
+                  discord.SelectOption(label="Long Prompt")
         ]
         super().__init__(placeholder="Select Setting ('/help settings' for details)", options=options, min_values=1, max_values=1)
     
