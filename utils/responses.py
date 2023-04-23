@@ -79,7 +79,6 @@ async def get_response(cb, message, apikey=OPENAI_API_KEY):
                 "frequency_penalty":cb.frequency_penalty
             }
         )
-        print(f"completion: {completion.json()}")
         if "error" in completion.json():
             return (-3, completion.json()['error']['message'])
         

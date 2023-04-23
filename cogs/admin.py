@@ -132,6 +132,7 @@ class AdminCommands(commands.Cog):
         except Exception as e:
             print(e)
             
+            
         if value == "emptylist":
             value = []
             value.clear()
