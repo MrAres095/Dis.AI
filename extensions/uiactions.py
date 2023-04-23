@@ -522,7 +522,7 @@ class ChangeModelDropdown(ui.Select):
         else:
             self.cb.model = "gpt-3.5-turbo"
                 
-        embed = discord.Embed(title=f"Successfully set model", description=f"Model for {self.cb.name} has been set to {self.values[0]}", colour=Colour.blue())
+        embed = discord.Embed(title=f"Successfully set model", description=f"Model for {self.cb.name} has been set to {self.values[0]}", description="Note: To use GPT-4. you must be whitelisted by OpenAI.\nhttps://openai.com/waitlist/gpt-4-api", colour=Colour.blue())
         await interaction.response.send_message(embed=embed)
         
 class ChangeModelView(ui.View):

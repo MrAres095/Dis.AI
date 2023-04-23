@@ -69,7 +69,7 @@ async def get_response(cb, message, apikey=OPENAI_API_KEY):
             apikey,
             timeout=300,
             payload={
-                "model": cb.model.strip().lower(),
+                "model": cb.model.strip(),
                 "messages":cb.context,
                 "max_tokens":cb.max_tokens,
                 "temperature":cb.temperature,
@@ -80,7 +80,7 @@ async def get_response(cb, message, apikey=OPENAI_API_KEY):
             }
         )
         if "error" in completion.json():
-            print("ERROR WEEP WOP")
+            print("ERROR WEE")
             print(completion.json())
             return (-3, completion.json()['error']['message'])
         
