@@ -52,7 +52,7 @@ class ChatBotSettings(commands.Cog):
             await interaction.response.send_message(embed=embed)
             return
         try:
-            embed = discord.Embed(title="Chatbot info for {cb.name} below")
+            embed = discord.Embed(title=f"Chatbot info for {cb.name} below")
             await interaction.response.send_message(embed=embed)
             channels = [self.bot.get_channel(channel_id).name for channel_id in cb.channels]
             out = f"""

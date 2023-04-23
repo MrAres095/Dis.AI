@@ -211,7 +211,7 @@ async def on_message(message):
             print(e)
             await message.channel.send(f"<@{message.author.id}> Invalid server id. See pins for information on how to get your server id.\nBe sure to paste ONLY the server id. ")
             return
-        if server.num_resets > 5:
+        if server.num_resets >= 5:
             await message.channel.send(f"<@{message.author.id}> You have reached `{server.num_resets} / 5` resets. (Resets 12:00 AM EST)")
         else:
             server.num_resets += 1

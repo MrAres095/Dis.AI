@@ -45,6 +45,9 @@ helpEmbed2.add_field(name="Use `/help 3` for page 3", inline=False, value="")
 helpEmbed2.add_field(name="```Prompt```", inline=False,
                 value="Changes the prompt of the selected chatbot. This is the heart of Dis.AI. Great prompting yields great results.")
 
+helpEmbed2.add_field(name="```Long Prompt```", inline=False,
+                value="Changes the model of your chatbot. You must've set an OpenAI API key with /setkey to use GPT-4.")
+
 helpEmbed2.add_field(name="```Message History Length```", inline=False,
                 value="The maximum number of messages the chatbot can store in memory. Higher values may use more tokens.\n")
 
