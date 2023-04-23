@@ -81,6 +81,9 @@ helpEmbed2.add_field(name="```Max Tokens```", inline=False,
 helpEmbed2.add_field(name="```Top P```", inline=False,
                 value="An alternative to temperature. It's generally recommended to alter this or temperature, but not both")
 
+helpEmbed2.add_field(name="```Long Prompt```", inline=False,
+                value="Enter longer prompts in the form of .txt files.")
+
 helpEmbed3 = discord.Embed(title="Commands List (page 2)", description="", colour=discord.Colour.blue())
 helpEmbed3.set_thumbnail(url='https://github.com/jacobjude/Dis.AI/blob/master/icon.png?raw=true')
 
@@ -102,6 +105,9 @@ helpEmbed3.add_field(name="```/insertMessage (chatbotname)```", inline=False,
 
 helpEmbed3.add_field(name="```/messagehistory (chatbot name)```", inline=False,
                 value="Shows the message history for the given chatbot.")
+
+helpEmbed3.add_field(name="```/tokencount (chatbot name)```", inline=False,
+                value="Shows the current number of tokens in the specified chatbot's message history.")
 
 helpEmbed3.add_field(name="```/setkey```", inline=False,
                 value="Set your OpenAI API key\nAdding a key removes all message restrictions!")
@@ -133,10 +139,10 @@ helpEmbed4.add_field(name="```/removeallowedrole (chatbot name)```", inline=Fals
 
 help_embeds = [helpEmbed1, helpEmbed2, helpEmbed3, helpEmbed4]
 
-discordEmbed = discord.Embed(title="Join the Discord server for more help & unlimited message resets", color=discord.Colour.blue())
+discordEmbed = discord.Embed(title="Join the Discord server for more help & message resets", color=discord.Colour.blue())
 
 async def get_vote_embed(guildid):
-    embed = discord.Embed(title=f"Vote for Dis.AI to send more messages!", description=f"[Click here to vote!\nVoting resets your message limit.\nIt's free, and it helps us out :)](https://top.gg/bot/1080638505023193139/vote?a={guildid})\n\n`Vote again in 12 hours! (until then, have other members vote if you want to reset again)`", colour=discord.Colour.blue())
+    embed = discord.Embed(title=f"Vote for Dis.AI to send more messages", description=f"[Click here to vote!\nVoting resets your daily message count.\nIt's free, and it helps us out :)](https://top.gg/bot/1080638505023193139/vote?a={guildid})\n\n`-You can vote every 12 hours.\n-Join our Discord server for more messages)`\n-Set your OpenAI API key with `/setkey` for unlimited messages.", colour=discord.Colour.blue())
     embed.set_footer(text="You must use this link to make your vote count towards your guild!")
     embed.set_thumbnail(url='https://github.com/jacobjude/Dis.AI/blob/master/icon.png?raw=true')
     return embed

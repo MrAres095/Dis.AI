@@ -7,6 +7,7 @@ import extensions.lists as lists
 import core.ChatBot as ChatBot
 from utils.jsonhandler import *
 from extensions.helpembeds import discordEmbed
+import asyncio
 
 class DeleteChatDropdown(ui.Select):
     def __init__(self, interaction):
@@ -63,7 +64,6 @@ class CreateCBView(ui.Modal, title="Enter New Chatbot Name"):
         newbot.prefixes = []
         newbot.search_prefixes=["search"]
         newbot.channels = []
-        print("created new bot")
         await add_cb_to_db(interaction.guild.id, await make_bot_dict(newbot))
         lists.bot_instances[interaction.guild.id].append(newbot)
         embed = discord.Embed(title=f"New chatbot created: {self.name}", description=f"```/enablehere {self.name}``` to enable the chatbot in the current channel\n```/settings``` to change settings (prompt, temperature, etc.)\n```/help``` for more commands", colour=Colour.blue())
@@ -99,6 +99,8 @@ class SettingsListDropdown(ui.Select):
                   discord.SelectOption(label="Frequency Penalty"),
                   discord.SelectOption(label="Max Tokens"),
                   discord.SelectOption(label="Top P"),
+                  discord.SelectOption(label="Long Prompt"),
+                  discord.SelectOption(label="Model")
                   
                   
         ]
@@ -140,6 +142,19 @@ class SettingsListDropdown(ui.Select):
             case "Include Usernames":
                 await interaction.response.defer()
                 await interaction.followup.send(view=IUMenu(self.cb))
+            case "Long Prompt":
+                try:
+                    embed=discord.Embed(title="Set Prompt: Attatch text file below", description="For long prompts, you can attatch a text file.", color=discord.Colour.blue())
+                    server = await get_server(interaction.guild.id)
+                    server.waiting = True
+                    server.current_cb = self.cb
+                    await interaction.response.send_message(embed=embed)
+                except Exception as e:
+                    print(f"Long prompt error: {e}")
+            case "Model":
+                await interaction.response.defer()
+                server = await get_server(interaction.guild.id)
+                await interaction.followup.send(view=ChangeModelView(self.cb, server))
             case _:
                 await interaction.response.send_message(f"Chose setting {self.values[0]}")
 
@@ -273,7 +288,7 @@ class MTKModal(ui.Modal, title="Enter New Max Token Amount"):
             embed.add_field(name="", value=str(self.cb.max_tokens))
             await interaction.response.send_message(embed=embed) 
         else:
-            embed = discord.Embed(title="Error", description="Enter an integer between 0 and 4096\n(Example: 2048)", color=discord.Colour.red())
+            embed = discord.Embed(title="Error", description="Enter an integer between 0 and 4096\n(Example: 2048)\nChatbots using the GPT-4 model can go up to 8k tokens.", color=discord.Colour.red())
             await interaction.response.send_message(embed=embed) 
 
 class MHLModal(ui.Modal, title="Enter New Max Message History Length"):
@@ -470,14 +485,52 @@ class OpenAIKeyModal(ui.Modal, title="Set OpenAI API Key"):
     async def on_submit(self, interaction: discord.Interaction):
         try:
             print("Setting key for user")
+            embed=discord.Embed(title="Setting key, please wait...", color=Colour.blue())
+            await interaction.response.send_message(embed=embed)
             complete = await self.server.set_openai_key(self.response.value)
             print("done, returned")
             if complete:
                 embed=discord.Embed(title="Successfully Set API key", color=Colour.blue())
-                await interaction.response.send_message(embed=embed)
+                await interaction.channel.send(embed=embed)
             else:
-                print("its inval")
+                print("its invalid")
                 embed=discord.Embed(title="Invalid key", color=Colour.red())
+                await interaction.channel.send(embed=embed)
+        except Exception as e:
+            print(e)
+             
+
+        
+        
+class ChangeModelDropdown(ui.Select):
+    def __init__(self, cb, server):
+        print("initing dropdown")
+        self.cb = cb
+        self.server = server
+        options =options =[discord.SelectOption(label="gpt-3.5-turbo"), discord.SelectOption(label="gpt-4")]
+        super().__init__(placeholder="Select Model", options=options, min_values=1, max_values=1)
+    
+    async def callback(self, interaction: discord.Interaction):
+        print("dropdown callback")
+        self.disabled = True
+        if self.values[0] == "gpt-4":
+            if self.server.openai_key:
+                self.cb.model = str(self.values[0])
+            else:
+                embed = discord.Embed(title=f"OpenAI API Key must be set to use GPT-4 model", description=f"Set your key using `/setkey`\nJoin the Discord for more help", colour=Colour.red())
                 await interaction.response.send_message(embed=embed)
+                await interaction.channel.send("https://discord.gg/xsXD7AafX5")
+                return
+        else:
+            self.cb.model = "gpt-3.5-turbo"
+                
+        embed = discord.Embed(title=f"Successfully set model", description=f"Model for {self.cb.name} has been set to {self.values[0]}", colour=Colour.blue())
+        await interaction.response.send_message(embed=embed)
+        
+class ChangeModelView(ui.View):
+    def __init__(self, cb, server):
+        super().__init__()
+        try:
+            self.add_item(ChangeModelDropdown(cb, server))
         except Exception as e:
             print(e)

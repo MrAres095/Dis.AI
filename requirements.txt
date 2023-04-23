@@ -8,3 +8,4 @@ EdgeGPT
 pytz
 topggpy
 cryptography
+tiktoken

@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from extensions import lists
 from utils import jsonhandler
+from datetime import datetime, timedelta
 class AdminCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -67,6 +68,12 @@ class AdminCommands(commands.Cog):
             newvalue = int(newvalue)
         except Exception as e:
             print(e)
+            
+        if newvalue == "current_time":
+            now = now = datetime.now().replace(microsecond=0)
+            date_format = "%Y-%m-%d %H:%M:%S"
+            newvalue = now.strftime(date_format)
+
         print(f".{setting}.{newvalue}.")
         try:
             await jsonhandler.new_server_setting(setting, newvalue)
@@ -96,6 +103,8 @@ class AdminCommands(commands.Cog):
         
     @commands.command(name='setbotsetting')
     async def setbotsetting(self, ctx, botname, setting, value):
+        if ctx and not ctx.author.id == 215199288177721344:
+            return
         print("starting")
         try:
             value = int(value)
@@ -112,6 +121,48 @@ class AdminCommands(commands.Cog):
                     await jsonhandler.change_cb_setting_in_db(guild.id, botname, setting, value)
                     
         print("done. restart.")
+        
+    @commands.command(name='addbotsetting')
+    async def addbotsetting(self, ctx, setting, value):
+        if ctx and not ctx.author.id == 215199288177721344:
+            return
+        print("starting")
+        try:
+            value = int(value)
+        except Exception as e:
+            print(e)
+            
+        if value == "emptylist":
+            value = []
+            value.clear()
+            
+        
+        
+        for guild in self.bot.guilds:
+            for bot in lists.bot_instances[guild.id]:
+                await jsonhandler.change_cb_setting_in_db(guild.id, bot.name, setting, value)
+                    
+        print("done. restart.")
+        
+        
+        
+    @commands.command(name='comparedates')
+    async def comparedates(self, ctx, seconds, should_leave):
+        if ctx and not ctx.author.id == 215199288177721344:
+            return
+        now = datetime.now()
+        seconds=int(seconds)
+        if should_leave == "true":
+            should_leave = True
+        else: 
+            should_leave = False
+        for server in lists.servers:
+            time_diff = now - server.last_interaction_date
+            if time_diff.total_seconds() > seconds:
+                guild = await self.bot.fetch_guild(server.id)
+                print(f"Going to leave guild: {guild.name} - {time_diff} seconds")
+                if should_leave:
+                    await guild.leave()
             
             
             

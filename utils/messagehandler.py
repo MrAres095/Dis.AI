@@ -3,15 +3,16 @@ from utils import responses
 import extensions.lists as lists
 from extensions.helpembeds import get_vote_embed, discordEmbed
 import asyncio
+from datetime import datetime
 
 
 async def process_ai_response(current_server, message):        
     for cb in lists.bot_instances[message.guild.id]:   # for each chatbot in the server
         if (cb.enabled and message.channel.id in cb.channels): # if the given ChatBot is enabled and can talk in the channel
-            if (not current_server.openai_key) and (current_server.dailymsgs >= 20):
+            if (not current_server.openai_key) and (current_server.dailymsgs >= 15):
                 embed = await get_vote_embed(current_server.id)
                 await message.channel.send(embed=embed)
-                embed = discord.Embed(title="You have reached the free daily message limit (20 messages/day).\n(Resets 12:00 AM EST)", description="Want to send more messages?\nVote for us on Top.GG to reset your daily message limit to 0! (Click the link above or use `/vote`!)", color=discord.Colour.red())
+                embed = discord.Embed(title="Free daily message limit reached (15 messages/day).\n(Resets 12:00 AM EST)", description="Vote for us on Top.GG to reset your daily message count to 0\n(Click the link above or use `/vote`!)\nJoin the Discord for more message resets", color=discord.Colour.red())
                 embed.set_footer(text="(Or, set your OpenAI API key with `/setkey` for unlimited messages")
                 await message.channel.send(embed=embed)
                 current_server.voting_channel_id = message.channel.id
@@ -56,14 +57,18 @@ async def process_ai_response(current_server, message):
                             cb.context.append({'role': 'system', 'content': f"A web search yielded the following result. With this new information, answer the user's question according to your previous conversation messages and instructions.\n\"{bing_response}\""})
 
                         response = await responses.get_response(cb, message, current_server.openai_key) # get response from openai
-                        print("got response")
                         current_server.dailymsgs += 1
-                        if response[0] == -1:
+                        current_server.last_interaction_date = datetime.now().replace(microsecond=0)
+                        
+                        if response[0] == -3:
+                            embed=discord.Embed(title="An error occurred.", description=f"Error: {response[1]}", color=discord.Colour.red())
+                            await message.channel.send(embed=embed)
+                        elif response[0] == -1:
                             embed = discord.Embed(title="Message failed OpenAI moderation check. Please comply with OpenAI usage policies.", color = discord.Colour.red())
                             await message.channel.send(embed=embed)
                         elif response[0] == -2:
                             if len(response[1]) > 1:
-                                embed = discord.Embed(title="An error occurred.", description=f"Error: Too many tokens requested. Please use ```/clearmessagehistory``` or reduce max tokens in ```/settings```", color=discord.Colour.red())
+                                embed = discord.Embed(title="Unexpected error occurred.", description=f"Error: Too many tokens requested. Please use ```/clearmessagehistory``` or reduce max tokens in ```/settings```", color=discord.Colour.red())
                             else:
                                 embed = discord.Embed(title="An error occurred. Please try again.", description="Error: Response took too long.", color=discord.Colour.red())
                             await message.channel.send(embed=embed)

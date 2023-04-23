@@ -10,6 +10,7 @@ import utils.messagehandler as messagehandler
 import core.ChatBot as ChatBot
 from EdgeGPT import Chatbot, ConversationStyle
 from config import COOKIES
+from utils.responses import get_tokens
 
 # commands that change a chatbot's settings
 class ChatBotSettings(commands.Cog):
@@ -51,10 +52,13 @@ class ChatBotSettings(commands.Cog):
             await interaction.response.send_message(embed=embed)
             return
         try:
+            embed = discord.Embed(title="Chatbot info for {cb.name} below")
+            await interaction.response.send_message(embed=embed)
             channels = [self.bot.get_channel(channel_id).name for channel_id in cb.channels]
             out = f"""
             __**General**__
 **Name:** {cb.name}
+**Model:** {cb.model}
 **Prompt:** {cb.prompt}
 **Enabled:** {cb.enabled}
 **Allowed Channels:** {", ".join(channels)}
@@ -70,8 +74,9 @@ __**Output Generation**__
 **Top P:** {cb.top_p}
 **Max Message History Length:** {cb.max_message_history_length}
 **Prompt Reminder Interval:** {cb.prompt_reminder_interval}
-            """
-            await messagehandler.send_msg(interaction, out)
+
+All settings shown above can be configured.\nSee`/settings` for more details about each setting."""
+            await messagehandler.send_channel_msg(interaction.channel, out)
         except Exception as e:
             print(e)
     
@@ -177,6 +182,12 @@ __**Output Generation**__
     async def forcemessage(self, interaction: discord.Interaction, chatbot_name: str, num_msgs: int) -> None:   
         cb = await get_cb(interaction, chatbot_name)
         current_server = await get_server(interaction.guild.id) # get Server that the message is from
+        if current_server.dailymsgs > 15:
+            return # do formal msg later
+        if num_msgs > 15:
+            num_msgs = 15
+        current_server.daily_msgs += num_msgs
+        
         await messagehandler.force_ai_response(interaction, cb, num_msgs)
 
     @app_commands.command(name="insertmessage", description="Shows all chatbots that are enabled in the current channel")
@@ -195,7 +206,6 @@ __**Output Generation**__
             embed = discord.Embed(title="Error", description="Please make sure you have entered the name correctly and try again.", colour=Colour.red())
             await interaction.response.send_message(embed=embed)
             return
-        current_server = await get_server(interaction.guild.id) # get Server that the message is from
         embed=discord.Embed(title=f"Message history for {cb.name} below", color=discord.Colour.blue())
         await interaction.response.send_message(embed=embed)
         out = ""
@@ -203,6 +213,20 @@ __**Output Generation**__
             out += f"{dict['role']}: {dict['content']}\n"
             
         await messagehandler.send_channel_msg(interaction.channel, out)
+        
+    @app_commands.command(name="tokencount", description="Shows the current number of tokens in the specified chatbot's message history")
+    async def tokencount(self, interaction:discord.Interaction, chatbot_name: str) -> None:
+        cb = await get_cb(interaction, chatbot_name)
+        if not cb:
+            embed = discord.Embed(title="Error", description="Please make sure you have entered the name correctly and try again.", colour=Colour.red())
+            await interaction.response.send_message(embed=embed)
+            return
+        
+        print("b4 numtokens")
+        numtokens = await get_tokens(cb.model, cb.context)
+        embed=discord.Embed(title=f"{cb.name} has about {numtokens} tokens in its message history", description="Notice: This may change over time and is only a close estimate.", color=discord.Colour.blue())
+        await interaction.response.send_message(embed=embed)
+       
         
 async def setup(bot):
     await bot.add_cog(ChatBotSettings(bot))

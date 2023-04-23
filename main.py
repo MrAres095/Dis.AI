@@ -46,6 +46,7 @@ async def reset_daily_msgs():
     try:
         for server in servers:
             server.dailymsgs = 0
+            server.num_resets = 0
         print(f"Reset all dailymsgs")
     except Exception as e:
         print(f"Failed to reset msgs")
@@ -158,7 +159,7 @@ async def on_ready():
         game = discord.Game("/createchatbot")
         await bot.change_presence(status=discord.Status.online, activity=game)
         await setup_topgg()
-        print(encrypt.get_key())
+        encrypt.get_key()
         await jsonhandler.checkdb(bot)
         
         
@@ -210,9 +211,12 @@ async def on_message(message):
             print(e)
             await message.channel.send(f"<@{message.author.id}> Invalid server id. See pins for information on how to get your server id.\nBe sure to paste ONLY the server id. ")
             return
-            
-        server.dailymsgs = 0
-        await message.channel.send(f"<@{message.author.id}> Successfully reset the message count for your server to zero.")
+        if server.num_resets > 5:
+            await message.channel.send(f"<@{message.author.id}> You have reached `{server.num_resets} / 5` resets. (Resets 12:00 AM EST)")
+        else:
+            server.num_resets += 1
+            server.dailymsgs = 0
+            await message.channel.send(f"<@{message.author.id}> Successfully reset the message count for your server to zero. `{server.num_resets} / 5` resets today.")
             
         
     now = datetime.now()
@@ -221,7 +225,25 @@ async def on_message(message):
     
 
     current_server = await jsonhandler.get_server(message.guild.id) # get Server that the message is from
-    print(f"\n{formatted_date} {message.author.name} \n(server: '{message.guild.name}', channel: '{message.channel.name}'), key: {bool(current_server.openai_key)}")
+    if str(message.content):
+        print(f"\n{formatted_date} {message.author.name}: {message.content} \n(server: '{message.guild.name}', channel: '{message.channel.name}'), key: {bool(current_server.openai_key)}")
+    
+    try:
+        if message.attachments and current_server.waiting and message.attachments[0].url.endswith(".txt"):
+            prompt = await message.attachments[0].read()
+            current_server.current_cb.setPrompt(prompt)
+            current_server.current_cb.context.clear()
+            current_server.waiting = False
+            embed=discord.Embed(title=f"Successfully Set Prompt for {current_server.current_cb.name}", color=discord.Colour.blue())
+            current_server.current_cb = None
+            await message.channel.send(embed=embed)
+            return
+    except Exception as e:
+        print(e)
+    
+    
+    
+    
     # process commands only if message author is admin, owner, or if no admins are set.
     if (not current_server.adminroles or message.author.id == message.guild.owner.id or any(role in current_server.adminroles for role in message.author.roles)):
         if message.content.startswith("ai."):

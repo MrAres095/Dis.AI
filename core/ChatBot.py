@@ -38,11 +38,25 @@ class ChatBot():
         except Exception as e:
             print(e)
             return False
-        if max_tokens <= 4096 and max_tokens >= 0:
-            self.max_tokens = max_tokens
-            return True
-        else:
-            return False
+        if self.model == "gpt-3.5-turbo":
+            if max_tokens <= 4096 and max_tokens > 0:
+                self.max_tokens = max_tokens
+                return True
+            else:
+                return False
+        elif self.model == "gpt-4":
+            if max_tokens <= 8192 and max_tokens > 0:
+                self.max_tokens = max_tokens
+                return True
+            else:
+                return False
+        elif self.model == "gpt-4-32k":
+            if max_tokens <= 32768 and max_tokens > 0:
+                self.max_tokens = max_tokens
+                return True
+            else:
+                return False
+            
         
     def settemp(self, temp):
         try:

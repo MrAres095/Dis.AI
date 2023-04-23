@@ -5,6 +5,31 @@ from config import OPENAI_API_KEY, COOKIES
 import openai_async
 import asyncio
 openai.api_key = OPENAI_API_KEY
+import tiktoken
+encgpt3 = tiktoken.encoding_for_model('gpt-3.5-turbo')
+encgpt4 = tiktoken.encoding_for_model('gpt-4')
+
+async def get_tokens(model, messages):
+    print("starting get tokems")
+    if model == "gpt-4" or model == "gpt-4-32k":
+        tokens_per_message = 4
+        tokens_per_name = -1
+        enc = encgpt4
+    elif model == "gpt-3.5-turbo":
+        tokens_per_message = 3
+        tokens_per_name = 1
+        enc = encgpt3
+    num_tokens = 0
+    for message in messages:
+        num_tokens += tokens_per_message
+        for key, value in message.items():
+            num_tokens += len(enc.encode(value))
+            if key == "name":
+                num_tokens += tokens_per_name
+    num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
+    return num_tokens
+
+    
 
 async def get_bing_response(question, bingbot):
     result = await bingbot.ask(prompt=question, conversation_style=ConversationStyle.creative, wss_link="wss://sydney.bing.com/sydney/ChatHub")
@@ -32,18 +57,19 @@ async def get_response(cb, message, apikey=OPENAI_API_KEY):
     
     if not apikey:
         apikey=OPENAI_API_KEY
+        cb.model="gpt-3.5-turbo"
         print(f"Context Len: {len(cb.context)}")
     else:
         print(f"Context Len: {len(cb.context)} - (custom API key)")
     for line in cb.context:
         print(line)
-    
+    print(f"model: {cb.model}")
     try:
         completion = await openai_async.chat_complete(
             apikey,
             timeout=300,
             payload={
-                "model":"gpt-3.5-turbo",
+                "model": cb.model,
                 "messages":cb.context,
                 "max_tokens":cb.max_tokens,
                 "temperature":cb.temperature,
@@ -53,9 +79,12 @@ async def get_response(cb, message, apikey=OPENAI_API_KEY):
                 "frequency_penalty":cb.frequency_penalty
             }
         )
-        if completion.status_code == 401:
-            return (-3, "Invalid key")
+        print(f"completion: {completion.json()}")
+        if "error" in completion.json():
+            return (-3, completion.json()['error']['message'])
+        
         cb.context.append({'role':'assistant', 'content':completion.json()['choices'][0]['message']['content']})
+        print(f"tokens: {completion.json()['usage']['prompt_tokens']}")
         return 0, completion.json()['choices'][0]
     except Exception as e:
         print("responses error")

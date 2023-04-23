@@ -6,9 +6,12 @@ import core.ChatBot as ChatBot
 import core.Server as Server
 from EdgeGPT import Chatbot
 from encryption import encrypt
-
+from datetime import datetime
 mongoclient = pymongo.MongoClient(MONGO_LINK)
 db = mongoclient[MONGONAME]
+
+date_format = "%Y-%m-%d %H:%M:%S"  
+
 print("created mongo client")
 
 async def checkdb(bot):
@@ -28,6 +31,7 @@ async def add_guild_to_db(guild):
             newserver = Server.Server(id=guild.id)
             newserver.adminroles = []
             newserver.allowedroles = []
+            newserver.last_interaction_date = datetime.now().replace(microsecond=0)
             lists.servers.append(newserver)
             lists.bot_instances[guild.id] = [newbot]
             def_bot = await make_bot_dict(newbot)
@@ -43,7 +47,7 @@ async def new_server_setting(setting, newvalue):
     for server in db.servers.find():
         await change_server_setting_in_db(server['_id'], setting, newvalue)
     
-    
+
 async def load_db_to_mem(guilds):
     try:
     # add all ChatBots to lists.bot_instances and servers to lists.servers
@@ -56,7 +60,8 @@ async def load_db_to_mem(guilds):
                     try:
                         lists.servers.append(Server.Server(id=server['_id'], adminroles=server['settings']['adminroles'], allowedroles=server['settings']['allowedroles'], 
                                                         dailymsgs=server['settings']['dailymsgs'],
-                                                        openai_key=encrypt.decrypt_string(server['settings']['openai_key']), voting_channel_id=server['settings']['voting_channel_id']))
+                                                        openai_key=encrypt.decrypt_string(server['settings']['openai_key']), voting_channel_id=server['settings']['voting_channel_id'],
+                                                        num_resets=0))
                     except Exception as e:
                         print("dec err")
                         print(e)
@@ -97,6 +102,7 @@ async def change_cb_setting_in_db(guildid, botname, setting, newvalue):
     
 async def change_server_setting_in_db(guildid, setting, newvalue):
     db.servers.update_one({"_id": guildid}, {"$set": { f"settings.{setting}": newvalue } })
+
     
 async def set_server(guild, server):
     def_settings = await make_settings_dict(server)
@@ -131,6 +137,7 @@ async def make_bot_dict(chatbot):
     # given a ChatBot, format it into a dictionary for export
     dict = {
         'name': chatbot.name,
+        'model': chatbot.model,
         "prompt": chatbot.prompt,
         "max_tokens": chatbot.max_tokens,
         "temperature": chatbot.temperature,
@@ -152,7 +159,8 @@ async def make_bot_dict(chatbot):
         
 async def make_settings_dict(Server):   
     settings_dict = {
-        'adminroles':Server.adminroles, 'allowedroles': Server.allowedroles, "dailymsgs": Server.dailymsgs, "openai_key":encrypt.encrypt_string(str(Server.openai_key)), "voting_channel_id": Server.voting_channel_id
+        'adminroles':Server.adminroles, 'allowedroles': Server.allowedroles, "dailymsgs": Server.dailymsgs, "openai_key":encrypt.encrypt_string(str(Server.openai_key)), 
+        "voting_channel_id": Server.voting_channel_id, "last_interaction_date": Server.last_interaction_date.strftime(date_format)
         }
     return settings_dict
 
