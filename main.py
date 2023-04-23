@@ -24,7 +24,7 @@ intents.members = True
 intents.guilds = True
 
 
-reset_time = time(hour=16, minute=00, tzinfo=timezone.utc)
+reset_time = time(hour=6, minute=00, tzinfo=timezone.utc)
 
 bot = commands.Bot(command_prefix='ai.', intents=intents, application_id=APPLICATION_ID)
 bot.remove_command('help')
